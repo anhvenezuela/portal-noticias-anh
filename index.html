@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #F9F8F6; color: #1D1D1B; }
+        body { font-family: 'Inter', sans-serif; background-color: #F9F8F6; color: #1D1D1B; scroll-behavior: smooth; }
         .font-serif { font-family: 'Playfair Display', serif; }
         .letra-capitular::first-letter {
             font-family: 'Playfair Display', serif;
@@ -59,7 +59,7 @@
                     <p class="text-xs text-slate-500 font-medium tracking-wide" id="lblSubtituloPrincipal">PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES</p>
                 </div>
             </div>
-            <!-- Menú de Secciones Dinámico Sincronizado -->
+            <!-- Menú de Secciones Sincronizado -->
             <nav id="menuCategoriasPublicas" class="flex flex-wrap items-center justify-center lg:justify-end gap-2 text-xs uppercase tracking-wider font-semibold text-slate-700">
                 <!-- Se inyecta dinámicamente -->
             </nav>
@@ -72,7 +72,7 @@
         </div>
     </header>
 
-    <!-- FRANJA DE TÍTULO DE SECCIÓN -->
+    <!-- FRANJA DE TÍTULO DE SECCIÓN DINÁMICA -->
     <div class="bg-[#0B4F8A] text-white py-8 px-4 shadow-inner">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-3xl font-bold font-serif" id="lblFranjaTitulo">Actualidad y Comunicados</h2>
@@ -132,13 +132,13 @@
         <!-- VISTA PÚBLICA -->
         <div id="vistaPublica" class="space-y-12">
             
-            <!-- NOTICIA DESTACADA DE PORTADA -->
+            <!-- NOTICIA DESTACADA DE PORTADA (SOLO EN INICIO) -->
             <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
                 <!-- Se inyecta dinámicamente -->
             </div>
 
-            <!-- GRILLA DE ARTÍCULOS RECIENTES -->
-            <div class="space-y-6">
+            <!-- SECCIÓN DE LISTADO DE ARTÍCULOS EXCLUSIVA POR CATEGORÍA -->
+            <div id="seccionListadoPublicaciones" class="space-y-6 scroll-mt-8">
                 <div class="border-b border-slate-300 pb-3 flex justify-between items-center">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-[#0B4F8A]" id="tituloSeccionActual">Archivo de Publicaciones</h3>
                     <span id="contadorPublicaciones" class="text-xs text-slate-500"></span>
@@ -489,8 +489,8 @@
             document.getElementById("lblBarraSuperior").innerText = cfg.barraSuperior;
             document.getElementById("lblTituloPrincipal").innerText = cfg.tituloPrincipal;
             document.getElementById("lblSubtituloPrincipal").innerText = cfg.subtituloPrincipal;
-            document.getElementById("lblFranjaTitulo").innerText = cfg.franjaTitulo;
-            document.getElementById("lblFranjaSub").innerText = cfg.franjaSub;
+            document.getElementById("lblFranjaTitulo").innerText = seccionFiltroActiva === 'todos' ? cfg.franjaTitulo : `Sección: ${seccionFiltroActiva}`;
+            document.getElementById("lblFranjaSub").innerText = seccionFiltroActiva === 'todos' ? cfg.franjaSub : `Mostrando publicaciones exclusivas de la categoría ${seccionFiltroActiva}.`;
             document.getElementById("lblFooterTexto").innerText = cfg.footerTexto;
             
             const linkInst = document.getElementById("linkFooterInstitucional");
@@ -555,15 +555,19 @@
         function renderizarMenuNavegacion(categorias) {
             const nav = document.getElementById("menuCategoriasPublicas");
             nav.innerHTML = `
-                <a href="#" onclick="filtrarPorSeccionNav('todos'); return false;" class="px-3 py-1.5 rounded-lg transition ${seccionFiltroActiva === 'todos' ? 'bg-[#0B4F8A] text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">Inicio</a>
+                <a href="#seccionListadoPublicaciones" onclick="filtrarPorSeccionNav('todos'); return false;" class="px-3 py-1.5 rounded-lg transition ${seccionFiltroActiva === 'todos' ? 'bg-[#0B4F8A] text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">Inicio</a>
             `;
             categorias.forEach(cat => {
                 const activo = seccionFiltroActiva === cat ? 'bg-[#0B4F8A] text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700';
                 const a = document.createElement("a");
-                a.href = "#";
+                a.href = "#seccionListadoPublicaciones";
                 a.className = `px-3 py-1.5 rounded-lg transition ${activo}`;
                 a.innerText = cat;
-                a.onclick = (e) => { e.preventDefault(); filtrarPorSeccionNav(cat); };
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    filtrarPorSeccionNav(cat);
+                    document.getElementById("seccionListadoPublicaciones").scrollIntoView({ behavior: 'smooth' });
+                };
                 nav.appendChild(a);
             });
             nav.innerHTML += `<button onclick="toggleBuscadorHeader()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 ml-1"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>`;
@@ -650,7 +654,7 @@
             const contadorPub = document.getElementById("contadorPublicaciones");
             const tituloSeccion = document.getElementById("tituloSeccionActual");
 
-            tituloSeccion.innerText = seccionFiltroActiva === 'todos' ? 'Archivo de Publicaciones' : `Categoría: ${seccionFiltroActiva}`;
+            tituloSeccion.innerText = seccionFiltroActiva === 'todos' ? 'Archivo de Publicaciones' : `Sección: ${seccionFiltroActiva}`;
 
             const fechaFiltro = document.getElementById("filtroFecha").value;
             const textoFiltro = document.getElementById("filtroTexto").value.toLowerCase();
@@ -671,6 +675,7 @@
             contadorPub.innerText = `${filtradas.length} artículos encontrados`;
 
             let destacada = filtradas.find(j => j.destacada) || filtradas[0];
+            // Mostrar la noticia destacada principal SOLAMENTE si estamos en la vista de "Inicio"
             if (destacada && seccionFiltroActiva === "todos" && !textoFiltro && !fechaFiltro) {
                 portadaContainer.style.display = "grid";
                 portadaContainer.innerHTML = `
@@ -702,8 +707,8 @@
             const paginadas = filtradas.slice(inicio, inicio + porPagina);
 
             listaContainer.innerHTML = "";
-            if (paginadas.length === 0 && portadaContainer.style.display === "none") {
-                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No se encontraron publicaciones en esta categoría.</div>`;
+            if (paginadas.length === 0) {
+                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No se encontraron publicaciones en esta sección o categoría.</div>`;
                 pagContenedor.innerHTML = "";
                 return;
             }
