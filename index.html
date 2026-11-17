@@ -50,18 +50,18 @@
     <header class="bg-white border-b border-slate-200 shadow-sm py-6 px-4">
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-4">
-                <div id="logoContainerHeader" class="w-16 h-16 bg-blue-50 border border-blue-200 rounded-full flex items-center justify-center text-[#0B4F8A] text-2xl shadow-inner overflow-hidden flex-shrink-0">
+                <div id="logoContainerHeader" class="w-16 h-16 bg-blue-50 border border-blue-200 rounded-full flex items-center justify-center text-[#0B4F8A] text-2xl shadow-inner overflow-hidden flex-shrink-0 cursor-pointer" onclick="navegarA('todos')">
                     <i class="fa-solid fa-landmark" id="logoIconDefault"></i>
                     <img id="logoImgCustom" src="" class="w-full h-full object-cover hidden" alt="Logo">
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold font-serif text-[#0B4F8A]" id="lblTituloPrincipal">Academia Nacional de la Historia</h1>
+                    <h1 class="text-xl md:text-2xl font-bold font-serif text-[#0B4F8A] cursor-pointer" onclick="navegarA('todos')" id="lblTituloPrincipal">Academia Nacional de la Historia</h1>
                     <p class="text-xs text-slate-500 font-medium tracking-wide" id="lblSubtituloPrincipal">PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES</p>
                 </div>
             </div>
-            <!-- Menú de Subpáginas Dinámico Sincronizado -->
+            <!-- Menú de Subpáginas Hipervinculadas -->
             <nav id="menuCategoriasPublicas" class="flex flex-wrap items-center justify-center lg:justify-end gap-2 text-xs uppercase tracking-wider font-semibold text-slate-700">
-                <!-- Se inyecta dinámicamente -->
+                <!-- Se inyecta dinámicamente con hipervínculos exactos -->
             </nav>
         </div>
         <!-- Buscador Desplegable -->
@@ -72,7 +72,7 @@
         </div>
     </header>
 
-    <!-- FRANJA DE TÍTULO DE SUBPÁGINA -->
+    <!-- FRANJA DE TÍTULO DE SUBPÁGINA DINÁMICA -->
     <div class="bg-[#0B4F8A] text-white py-8 px-4 shadow-inner">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-3xl font-bold font-serif" id="lblFranjaTitulo">Actualidad y Comunicados</h2>
@@ -132,12 +132,12 @@
         <!-- VISTA PÚBLICA -->
         <div id="vistaPublica" class="space-y-12">
             
-            <!-- PORTADA DESTACADA (SOLO EN INICIO) -->
+            <!-- PORTADA DESTACADA (SOLO APARECE EN LA PÁGINA DE INICIO) -->
             <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
                 <!-- Se inyecta dinámicamente -->
             </div>
 
-            <!-- SUBPÁGINA / LISTADO EXCLUSIVO DE CATEGORÍA -->
+            <!-- SUBPÁGINA / LISTADO EXCLUSIVO DE NOTICIAS POR CATEGORÍA -->
             <div id="seccionListadoPublicaciones" class="space-y-6">
                 <div class="border-b border-slate-300 pb-3 flex justify-between items-center">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-[#0B4F8A]" id="tituloSeccionActual">Archivo de Publicaciones</h3>
@@ -462,7 +462,7 @@
             });
         }
 
-        // Manejador de rutas (Subpáginas con URL Hash ej. #seccion/Institucional-y-Directiva)
+        // Sistema de subpáginas automáticas por URL Hash (#seccion/...)
         window.addEventListener("hashchange", () => {
             leerRutaHash();
         });
@@ -482,8 +482,7 @@
         function leerRutaHash() {
             const hash = window.location.hash;
             if (hash.startsWith("#seccion/")) {
-                const categoriaDecodificada = decodeURIComponent(hash.replace("#seccion/", ""));
-                seccionFiltroActiva = categoriaDecodificada;
+                seccionFiltroActiva = decodeURIComponent(hash.replace("#seccion/", ""));
             } else {
                 seccionFiltroActiva = "todos";
             }
@@ -517,7 +516,7 @@
             document.getElementById("lblTituloPrincipal").innerText = cfg.tituloPrincipal;
             document.getElementById("lblSubtituloPrincipal").innerText = cfg.subtituloPrincipal;
             
-            // Subpágina / Franja dinámica
+            // Textos de la franja según la subpágina activa
             if (seccionFiltroActiva === 'todos') {
                 document.getElementById("lblFranjaTitulo").innerText = cfg.franjaTitulo;
                 document.getElementById("lblFranjaSub").innerText = cfg.franjaSub;
@@ -646,7 +645,7 @@
             db.categorias.push(nueva);
             guardarDB(db);
             input.value = "";
-            alert("¡Categoría y nueva subpágina agregadas con éxito!");
+            alert("¡Categoría y subpágina creadas con éxito!");
         }
 
         function eliminarEtiqueta(cat) {
@@ -703,7 +702,7 @@
             contadorPub.innerText = `${filtradas.length} artículos encontrados`;
 
             let destacada = filtradas.find(j => j.destacada) || filtradas[0];
-            // Mostrar la noticia principal de portada SOLAMENTE en la página de "Inicio"
+            // Mostrar la noticia principal de portada SOLAMENTE en la página de inicio
             if (destacada && seccionFiltroActiva === "todos" && !textoFiltro && !fechaFiltro) {
                 portadaContainer.style.display = "grid";
                 portadaContainer.innerHTML = `
