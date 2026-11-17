@@ -14,8 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Chart.js para gráficos estadísticos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Librería para generar PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Firebase App y Firestore SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .font-serif { font-family: 'Playfair Display', serif; }
@@ -45,7 +46,7 @@
                     <p class="text-xs text-[#B48A3E] flex items-center gap-2 font-medium">
                         <span>Portal Oficial de Noticias e Investigación | RIF: G-20001234-5</span>
                         <span id="cloudStatus" class="inline-flex items-center gap-1 bg-[#152946] text-amber-200 px-2 py-0.5 rounded-full text-[10px]">
-                            <i class="fa-solid fa-cloud"></i> Conectando...
+                            <i class="fa-solid fa-cloud"></i> Conectando a Nube...
                         </span>
                     </p>
                 </div>
@@ -228,7 +229,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Buscar por Título, Autor o Tema:</label>
                             <div class="flex gap-2">
-                                <input type="text" id="filtroTexto" oninput="filtrarInformesPublicos()" placeholder="ej. Tutor, Individuo, Boletín..." class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
+                                <input type="text" id="filtroTexto" oninput="filtrarInformesPublicos()" placeholder="ej. Straka, Individuo, Boletín..." class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
                                 <button onclick="limpiarFiltrosBusqueda()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs rounded-lg font-medium transition cursor-pointer" title="Limpiar filtros">Limpiar</button>
                             </div>
                         </div>
@@ -241,10 +242,7 @@
                     </h3>
                     <p class="text-sm text-slate-600 mb-6 font-serif">Selecciona una publicación para leer el texto completo, ver detalles académicos y obtener la cita bibliográfica automática:</p>
                     
-                    <!-- Cuadrícula de publicaciones -->
                     <div id="pubListaInformes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-                    <!-- Paginación Interactiva -->
                     <div id="paginacionContenedor" class="flex flex-wrap items-center justify-center gap-2 mt-8 pt-4 border-t border-slate-200"></div>
                 </div>
             </div>
@@ -258,8 +256,8 @@
                     <p class="text-sm text-slate-500">Editor en jefe: <strong id="adminNombreDisplay" class="text-[#1B365D]">Miembro de la Junta</strong>.</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="cargarDatosBaseAdmin()" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-[#1B365D] rounded-lg text-xs font-medium transition cursor-pointer border border-amber-200" title="Cargar noticias institucionales base de la Academia">
-                        <i class="fa-solid fa-database mr-1"></i> Cargar Noticias Históricas Base
+                    <button onclick="cargarDatosBaseAdmin()" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-[#1B365D] rounded-lg text-xs font-medium transition cursor-pointer border border-amber-200">
+                        <i class="fa-solid fa-database mr-1"></i> Restaurar Noticias Base
                     </button>
                     <button onclick="cerrarAdmin()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar Sesión
@@ -272,8 +270,6 @@
                 <h3 class="text-base font-bold text-[#1B365D] font-serif flex items-center gap-2 border-b pb-2">
                     <i class="fa-solid fa-list-ol text-[#B48A3E]"></i> Orden de las Secciones en el Portal Público
                 </h3>
-                <p class="text-xs text-slate-500">Asigna un número del 1 al 5 a cada bloque:</p>
-                
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
                     <div class="bg-slate-50 p-3 rounded-xl border">
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Acerca de la Institución:</label>
@@ -318,7 +314,6 @@
                         <label class="block text-xs font-medium text-slate-600 mb-1">Descripción de la Institución:</label>
                         <textarea id="editAcercaTexto" rows="2" required class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t">
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Título del Banner Principal:</label>
@@ -333,7 +328,6 @@
                             <input type="text" id="editLabelGranTotal" required class="w-full px-3 py-2 border rounded-lg text-sm">
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Etiqueta Tarjeta Artículos:</label>
@@ -344,7 +338,6 @@
                             <input type="text" id="editLabelCarbono" required class="w-full px-3 py-2 border rounded-lg text-sm">
                         </div>
                     </div>
-
                     <div class="flex items-center justify-between pt-2 border-t">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="editAcercaVisible" class="w-4 h-4 text-[#1B365D] rounded">
@@ -428,7 +421,6 @@
                         </div>
                     </div>
 
-                    <!-- Campos de contenido del artículo -->
                     <div class="space-y-4 pt-2 border-t">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Título de la Noticia o Artículo:</label>
@@ -535,116 +527,130 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE LÓGICA Y DATOS -->
+    <!-- SCRIPT DE LÓGICA CON FIREBASE FIRESTORE -->
     <script>
-        // Variables globales del sistema
+        // Configuración de Firebase conectada a tu proyecto anh-portal-noticias
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoOZHIgxTbL_Qs-d2rwWFMJeooCKsKQY4",
+            authDomain: "anh-portal-noticias.firebaseapp.com",
+            projectId: "anh-portal-noticias",
+            storageBucket: "anh-portal-noticias.firebasestorage.app",
+            messagingSenderId: "573415998722",
+            appId: "1:573415998722:web:7edc365ae57f9098cf6e1b",
+            measurementId: "G-BK5Q6HY6KR"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const dbFirestore = firebase.firestore();
+        const docRef = dbFirestore.collection("portal").doc("datos_anh");
+
         let lineChartInstance = null;
         let paginaActual = 1;
         const porPagina = 6;
         let noticiaSeleccionadaParaCita = null;
+        let dbMemoria = null;
+        let sesionAdminActiva = false;
 
-        // Estructura de Datos en LocalStorage con Sincronización en la Nube simulada
-        const DB_KEY = "db_anh_portal_noticias_v1";
+        function obtenerEstructuraPorDefecto() {
+            return {
+                admin: {
+                    usuario: "admin",
+                    clave: "anh2026*",
+                    correo: "secretaria@anhvenezuela.org",
+                    nombre: "Junta Directiva ANH"
+                },
+                logoUrl: "",
+                textos: {
+                    acercaBadge: "Institución Bicentenaria",
+                    acercaTitulo: "Salvaguarda de la Memoria Histórica Nacional",
+                    acercaTexto: "Fundada para promover la investigación rigurosa, el resguardo documental y la divulgación del devenir histórico venezolano y americano con estricto rigor crítico y académico.",
+                    acercaVisible: true,
+                    bannerTitulo: "Crónica y Actualidad Historiográfica",
+                    bannerSub: "Accede a las últimas investigaciones, incorporaciones de nuevos Individuos de Número y convocatorias oficiales.",
+                    labelGranTotal: "Publicaciones Activas",
+                    labelKilos: "Artículos y Ensayos Publicados",
+                    labelCarbono: "Condecoraciones y Premios"
+                },
+                orden: { acerca: 1, tarjetas: 2, grafico: 3, materiales: 4, informes: 5 },
+                jornadas: [
+                    {
+                        id: "anh_1",
+                        fecha: "2026-11-15",
+                        lugar: "Individuos de Número / Conmemoraciones",
+                        autor: "Dr. Tomás Straka",
+                        titulo: "Incorporación del nuevo Individuo de Número Sillón N° 12",
+                        sumario: "La Academia Nacional de la Historia celebró la solemne incorporación del ilustre historiador con su discurso sobre la historiografía republicana.",
+                        contenido: "En solemne sesión celebrada en el Salón de Sesiones de la Academia Nacional de la Historia, se procedió a la recepción oficial del nuevo Individuo de Número, quien ocupará el Sillón N° 12. Durante su discurso de orden, titulado 'Las fuentes primarias y la construcción de la conciencia nacional', destacó la importancia ineludible de preservar el patrimonio documental de la nación frente a los retos del siglo XXI.\n\nLa respuesta al discurso estuvo a cargo del Director de la corporación, quien resaltó los méritos académicos y las investigaciones pioneras del recipiendario en el estudio de las independencias hispanoamericanas.",
+                        imagen: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80",
+                        destacada: true
+                    },
+                    {
+                        id: "anh_2",
+                        fecha: "2026-11-10",
+                        lugar: "Boletín y Publicaciones",
+                        autor: "Comité Editorial",
+                        titulo: "Publicación del nuevo número del Boletín de la Academia Nacional de la Historia",
+                        sumario: "Ya se encuentra disponible la edición trimestral que recopila ensayos inéditos sobre historia colonial y contemporánea.",
+                        contenido: "El Comité Editorial se complace en anunciar la puesta en circulación del número más reciente del histórico Boletín de la Academia Nacional de la Historia, fundado en 1912. Esta edición incluye monografías especializadas sobre las rutas comerciales del cacao en la Provincia de Venezuela, así como un valioso epistolario inédito del Libertador Simón Bolívar resguardado en nuestros archivos.",
+                        imagen: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
+                        destacada: false
+                    },
+                    {
+                        id: "anh_3",
+                        fecha: "2026-11-05",
+                        lugar: "Eventos, Conferencias y Concursos",
+                        autor: "Secretaría Académica",
+                        titulo: "Apertura del Concurso para el Premio Nacional de Historia Francisco González Guinán",
+                        sumario: "Se convoca a historiadores e investigadores a postular sus obras inéditas para la edición 2026 del galardón.",
+                        contenido: "La Academia Nacional de la Historia abre oficialmente el proceso de postulación para el Premio Nacional de Historia Francisco González Guinán en su edición 2026. Podrán participar autores nacionales y extranjeros con obras de rigurosa investigación histórica sobre Venezuela y el área del Caribe. El veredicto del jurado calificador se dará a conocer en sesión solemne el próximo mes de diciembre.",
+                        imagen: "https://images.unsplash.com/photo-1507842217343-583bb7270b67?auto=format&fit=crop&w=800&q=80",
+                        destacada: false
+                    }
+                ]
+            };
+        }
 
         function obtenerDB() {
-            const data = localStorage.getItem(DB_KEY);
-            if (!data) {
-                const dbInicial = {
-                    admin: {
-                        usuario: "admin",
-                        clave: "anh2026*",
-                        correo: "secretaria@anhvenezuela.org",
-                        nombre: "Junta Directiva ANH"
-                    },
-                    logoUrl: "",
-                    textos: {
-                        acercaBadge: "Institución Bicentenaria",
-                        acercaTitulo: "Salvaguarda de la Memoria Histórica Nacional",
-                        acercaTexto: "Fundada para promover la investigación rigurosa, el resguardo documental y la divulgación del devenir histórico venezolano y americano con estricto rigor crítico y académico.",
-                        acercaVisible: true,
-                        bannerTitulo: "Crónica y Actualidad Historiográfica",
-                        bannerSub: "Accede a las últimas investigaciones, incorporaciones de nuevos Individuos de Número y convocatorias oficiales.",
-                        labelGranTotal: "Publicaciones Activas",
-                        labelKilos: "Artículos y Ensayos Publicados",
-                        labelCarbono: "Condecoraciones y Premios"
-                    },
-                    orden: {
-                        acerca: 1,
-                        tarjetas: 2,
-                        grafico: 3,
-                        materiales: 4,
-                        informes: 5
-                    },
-                    jornadas: [
-                        {
-                            id: "anh_1",
-                            fecha: "2026-11-15",
-                            lugar: "Individuos de Número / Conmemoraciones",
-                            autor: "Dr. Tomás Straka",
-                            titulo: "Incorporación del nuevo Individuo de Número Sillón N° 12",
-                            sumario: "La Academia Nacional de la Historia celebró la solemne incorporación del ilustre historiador con su discurso sobre la historiografía republicana.",
-                            contenido: "En solemne sesión celebrada en el Salón de Sesiones de la Academia Nacional de la Historia, se procedió a la recepción oficial del nuevo Individuo de Número, quien ocupará el Sillón N° 12. Durante su discurso de orden, titulado 'Las fuentes primarias y la construcción de la conciencia nacional', destacó la importancia ineludible de preservar el patrimonio documental de la nación frente a los retos del siglo XXI.\n\nLa respuesta al discurso estuvo a cargo del Director de la corporación, quien resaltó los méritos académicos y las investigaciones pioneras del recipiendario en el estudio de las independencias hispanoamericanas.",
-                            imagen: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80",
-                            destacada: true
-                        },
-                        {
-                            id: "anh_2",
-                            fecha: "2026-11-10",
-                            lugar: "Boletín y Publicaciones",
-                            autor: "Comité Editorial",
-                            titulo: "Publicación del nuevo número del Boletín de la Academia Nacional de la Historia",
-                            sumario: "Ya se encuentra disponible la edición trimestral que recopila ensayos inéditos sobre historia colonial y contemporánea.",
-                            contenido: "El Comité Editorial se complace en anunciar la puesta en circulación del número más reciente del histórico Boletín de la Academia Nacional de la Historia, fundado en 1912. Esta edición incluye monografías especializadas sobre las rutas comerciales del cacao en la Provincia de Venezuela, así como un valioso epistolario inédito del Libertador Simón Bolívar resguardado en nuestros archivos.",
-                            imagen: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
-                            destacada: false
-                        },
-                        {
-                            id: "anh_3",
-                            fecha: "2026-11-05",
-                            lugar: "Eventos, Conferencias y Concursos",
-                            autor: "Secretaría Académica",
-                            titulo: "Apertura del Concurso para el Premio Nacional de Historia Francisco González Guinán",
-                            sumario: "Se convoca a historiadores e investigadores a postular sus obras inéditas para la edición 2026 del galardón.",
-                            contenido: "La Academia Nacional de la Historia abre oficialmente el proceso de postulación para el Premio Nacional de Historia Francisco González Guinán en su edición 2026. Podrán participar autores nacionales y extranjeros con obras de rigurosa investigación histórica sobre Venezuela y el área del Caribe. El veredicto del jurado calificador se dará a conocer en sesión solemne el próximo mes de diciembre.",
-                            imagen: "https://images.unsplash.com/photo-1507842217343-583bb7270b67?auto=format&fit=crop&w=800&q=80",
-                            destacada: false
-                        }
-                    ],
-                    sesionAdmin: false,
-                    adminUsuarioActual: ""
-                };
-                localStorage.setItem(DB_KEY, JSON.stringify(dbInicial));
-                return dbInicial;
-            }
-            return JSON.parse(data);
+            return dbMemoria ? dbMemoria : obtenerEstructuraPorDefecto();
         }
 
-        function guardarDB(db) {
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            sincronizarNubeEstado();
-            renderizarTodo();
-        }
-
-        function sincronizarNubeEstado() {
+        function guardarDB(nuevaDb) {
+            dbMemoria = nuevaDb;
             const status = document.getElementById("cloudStatus");
-            if(status) {
-                status.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Sincronizado en línea`;
-                setTimeout(() => {
-                    status.innerHTML = `<i class="fa-solid fa-cloud"></i> Sincronizado en línea`;
-                }, 1500);
-            }
+            if (status) status.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Guardando en Nube...`;
+
+            docRef.set(nuevaDb).then(() => {
+                if (status) status.innerHTML = `<i class="fa-solid fa-cloud"></i> Sincronizado en vivo`;
+                renderizarTodo();
+            }).catch((error) => {
+                console.error("Error guardando en Firestore:", error);
+                alert("Hubo un error al sincronizar con Firebase: " + error.message);
+            });
         }
 
-        // Inicialización al cargar la ventana
+        // Escuchar cambios en tiempo real desde la nube
         window.addEventListener("DOMContentLoaded", () => {
-            renderizarTodo();
-            verificarEstadoSesion();
+            docRef.onSnapshot((doc) => {
+                const status = document.getElementById("cloudStatus");
+                if (doc.exists) {
+                    dbMemoria = doc.data();
+                    if (status) status.innerHTML = `<i class="fa-solid fa-cloud"></i> Sincronizado en vivo`;
+                    renderizarTodo();
+                } else {
+                    // Primera vez que se abre: crea la base de datos en Firebase con los datos iniciales
+                    guardarDB(obtenerEstructuraPorDefecto());
+                }
+            }, (error) => {
+                console.error("Error de lectura en Firebase:", error);
+                const status = document.getElementById("cloudStatus");
+                if (status) status.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Sin conexión nube`;
+                renderizarTodo();
+            });
         });
 
         function renderizarTodo() {
             const db = obtenerDB();
             
-            // Logo
             const logoContainer = document.getElementById("headerLogoContainer");
             const adminPreview = document.getElementById("adminLogoPreview");
             if (db.logoUrl) {
@@ -655,7 +661,6 @@
                 adminPreview.innerHTML = `<i class="fa-solid fa-landmark-dome"></i>`;
             }
 
-            // Textos públicos
             document.getElementById("pubAcercaBadge").innerText = db.textos.acercaBadge;
             document.getElementById("pubAcercaTitulo").innerText = db.textos.acercaTitulo;
             document.getElementById("pubAcercaTexto").innerText = db.textos.acercaTexto;
@@ -665,18 +670,12 @@
             document.getElementById("pubLabelKilos").innerText = db.textos.labelKilos;
             document.getElementById("pubLabelCarbono").innerText = db.textos.labelCarbono;
 
-            // Visibilidad de Acerca
             const bloqueAcerca = document.getElementById("bloqueAcerca");
-            if (db.textos.acercaVisible) {
-                bloqueAcerca.classList.remove("hidden");
-            } else {
-                bloqueAcerca.classList.add("hidden");
-            }
+            if (db.textos.acercaVisible) bloqueAcerca.classList.remove("hidden");
+            else bloqueAcerca.classList.add("hidden");
 
-            // Orden de bloques
             ordenarBloquesVistaPublica(db.orden);
 
-            // Poblar inputs admin de textos y orden
             document.getElementById("editAcercaBadge").value = db.textos.acercaBadge;
             document.getElementById("editAcercaTitulo").value = db.textos.acercaTitulo;
             document.getElementById("editAcercaTexto").value = db.textos.acercaTexto;
@@ -696,12 +695,10 @@
             document.getElementById("editAdminUsuario").value = db.admin.usuario;
             document.getElementById("editAdminCorreo").value = db.admin.correo;
 
-            // Totales
             const totalPublicaciones = db.jornadas.length;
             document.getElementById("pubGranTotal").innerText = totalPublicaciones;
             document.getElementById("pubTotalKilos").innerText = totalPublicaciones + " Registradas";
 
-            // Renderizar gráficos y listas
             renderizarPorcentajeMateriales(db.jornadas);
             renderizarListaInformesPublicos(db.jornadas);
             actualizarGraficoLineasAnual();
@@ -718,17 +715,12 @@
                 materiales: document.getElementById("bloqueMaterialesPorcentaje"),
                 informes: document.getElementById("bloqueInformesBuscador")
             };
-
-            // Ordenar array según los números asignados
             const ordenArray = Object.keys(orden).sort((a, b) => orden[a] - orden[b]);
             ordenArray.forEach(key => {
-                if(mapaBloques[key]) {
-                    vistaPublica.appendChild(mapaBloques[key]);
-                }
+                if (mapaBloques[key]) vistaPublica.appendChild(mapaBloques[key]);
             });
         }
 
-        // --- NAVEGACIÓN Y VISTAS ---
         function cambiarVista(vista) {
             const vPublica = document.getElementById("vistaPublica");
             const vAdmin = document.getElementById("vistaAdmin");
@@ -741,8 +733,7 @@
                 btnPub.classList.add("bg-[#284a7a]");
                 btnAdm.classList.remove("bg-[#284a7a]");
             } else {
-                const db = obtenerDB();
-                if (!db.sesionAdmin) {
+                if (!sesionAdminActiva) {
                     abrirModalAcceso();
                     return;
                 }
@@ -753,7 +744,6 @@
             }
         }
 
-        // --- AUTENTICACIÓN ADMIN ---
         function abrirModalAcceso() {
             document.getElementById("authModal").classList.remove("hidden");
             document.getElementById("formLogin").classList.remove("hidden");
@@ -773,9 +763,7 @@
             const db = obtenerDB();
 
             if (usr === db.admin.usuario && pwd === db.admin.clave) {
-                db.sesionAdmin = true;
-                db.adminUsuarioActual = usr;
-                guardarDB(db);
+                sesionAdminActiva = true;
                 cerrarModalAcceso();
                 document.getElementById("adminNombreDisplay").innerText = db.admin.nombre;
                 cambiarVista("admin");
@@ -785,17 +773,8 @@
         }
 
         function cerrarAdmin() {
-            const db = obtenerDB();
-            db.sesionAdmin = false;
-            guardarDB(db);
+            sesionAdminActiva = false;
             cambiarVista("publico");
-        }
-
-        function verificarEstadoSesion() {
-            const db = obtenerDB();
-            if (db.sesionAdmin) {
-                document.getElementById("adminNombreDisplay").innerText = db.admin.nombre;
-            }
         }
 
         function mostrarRecuperacion() {
@@ -828,16 +807,14 @@
                 }
                 db.admin.clave = nuevaClave;
                 guardarDB(db);
-                alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.");
+                alert("¡Contraseña actualizada en la nube con éxito!");
                 abrirModalAcceso();
             }
         }
 
-        // --- RENDERIZADO PÚBLICO ---
         function renderizarPorcentajeMateriales(jornadas) {
             const contenedor = document.getElementById("pubListaMateriales");
             contenedor.innerHTML = "";
-
             const categorias = [
                 "Institucional y Directiva",
                 "Individuos de Número / Conmemoraciones",
@@ -845,24 +822,16 @@
                 "Boletín y Publicaciones",
                 "Eventos, Conferencias y Concursos"
             ];
-
             const conteo = {};
             categorias.forEach(cat => conteo[cat] = 0);
-
             jornadas.forEach(j => {
-                if (conteo[j.lugar] !== undefined) {
-                    conteo[j.lugar]++;
-                } else {
-                    conteo[j.lugar] = (conteo[j.lugar] || 0) + 1;
-                }
+                if (conteo[j.lugar] !== undefined) conteo[j.lugar]++;
+                else conteo[j.lugar] = (conteo[j.lugar] || 0) + 1;
             });
-
             const total = jornadas.length || 1;
-
             Object.keys(conteo).forEach(cat => {
                 const cant = conteo[cat];
                 const porcentaje = Math.round((cant / total) * 100);
-
                 const div = document.createElement("div");
                 div.className = "space-y-1";
                 div.innerHTML = `
@@ -881,8 +850,6 @@
         function renderizarListaInformesPublicos(jornadas) {
             const contenedor = document.getElementById("pubListaInformes");
             const pagContenedor = document.getElementById("paginacionContenedor");
-            
-            // Aplicar filtros de búsqueda
             const fechaFiltro = document.getElementById("filtroFecha").value;
             const textoFiltro = document.getElementById("filtroTexto").value.toLowerCase();
 
@@ -897,12 +864,9 @@
                 return coincideFecha && coincideTexto;
             });
 
-            // Ordenar por fecha descendente
             filtradas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
             const totalPaginas = Math.ceil(filtradas.length / porPagina) || 1;
             if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-
             const inicio = (paginaActual - 1) * porPagina;
             const paginadas = filtradas.slice(inicio, inicio + porPagina);
 
@@ -938,7 +902,6 @@
                 contenedor.appendChild(tarjeta);
             });
 
-            // Paginación
             pagContenedor.innerHTML = "";
             for (let i = 1; i <= totalPaginas; i++) {
                 const btn = document.createElement("button");
@@ -982,26 +945,20 @@
         }
 
         function toggleAcordeonBuscador() {
-            const contenido = document.getElementById("contenidoAcordeon");
-            const icono = document.getElementById("iconoAcordeon");
-            contenido.classList.toggle("hidden");
-            icono.classList.toggle("rotate-180");
+            document.getElementById("contenidoAcordeon").classList.toggle("hidden");
+            document.getElementById("iconoAcordeon").classList.toggle("rotate-180");
         }
 
-        // --- MODAL DE LECTURA Y CITAS ---
         function abrirModalLectura(id) {
             const db = obtenerDB();
             const j = db.jornadas.find(item => item.id === id);
             if (!j) return;
-
             noticiaSeleccionadaParaCita = j;
-
             document.getElementById("modalCatBadge").innerText = j.lugar;
             document.getElementById("modalTitulo").innerText = j.titulo;
             document.getElementById("modalSubInfo").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${j.fecha} &nbsp;|&nbsp; <i class="fa-solid fa-pen-nib mr-1"></i> ${j.autor}`;
             document.getElementById("modalSumario").innerText = j.sumario;
             document.getElementById("modalContenido").innerText = j.contenido;
-
             const imgContainer = document.getElementById("modalImagenContainer");
             const imgElem = document.getElementById("modalImagen");
             if (j.imagen) {
@@ -1010,7 +967,6 @@
             } else {
                 imgContainer.classList.add("hidden");
             }
-
             document.getElementById("modalLectura").classList.remove("hidden");
         }
 
@@ -1023,20 +979,14 @@
             const j = noticiaSeleccionadaParaCita;
             const anio = j.fecha.split("-")[0];
             const citaAPA = `${j.autor}. (${anio}). *${j.titulo}*. Academia Nacional de la Historia. Recuperado del portal oficial.`;
-            
             navigator.clipboard.writeText(citaAPA).then(() => {
-                alert("¡Cita bibliográfica en formato APA copiada al portapapeles con éxito!");
-            }).catch(err => {
-                console.error("Error al copiar: ", err);
+                alert("¡Cita bibliográfica en formato APA copiada al portapapeles!");
             });
         }
 
-        // --- GRÁFICO HISTÓRICO ---
         function actualizarGraficoLineasAnual() {
             const db = obtenerDB();
             const filtroCat = document.getElementById("filtroMaterialGrafico").value;
-
-            // Agrupar por Años
             const anosMap = {};
             db.jornadas.forEach(j => {
                 const anio = j.fecha ? j.fecha.split("-")[0] : "2026";
@@ -1044,21 +994,14 @@
                     anosMap[anio] = (anosMap[anio] || 0) + 1;
                 }
             });
-
             const anosOrdenados = Object.keys(anosMap).sort();
             const valores = anosOrdenados.map(a => anosMap[a]);
-
-            // Si no hay datos, mostrar año actual en cero
             if (anosOrdenados.length === 0) {
                 anosOrdenados.push("2026");
                 valores.push(0);
             }
-
             const ctx = document.getElementById("lineChartCanvas").getContext("2d");
-            if (lineChartInstance) {
-                lineChartInstance.destroy();
-            }
-
+            if (lineChartInstance) lineChartInstance.destroy();
             lineChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1076,26 +1019,19 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, position: 'bottom' }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { precision: 0 } }
-                    }
+                    plugins: { legend: { display: true, position: 'bottom' } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
                 }
             });
         }
 
-        // --- ADMINISTRACIÓN Y CRUD ---
         function renderizarTablaAdmin(jornadas) {
             const tbody = document.getElementById("tablaAdminJornadas");
             tbody.innerHTML = "";
-
             if (jornadas.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">No hay publicaciones registradas.</td></tr>`;
                 return;
             }
-
             jornadas.forEach(j => {
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50";
@@ -1118,7 +1054,6 @@
             e.preventDefault();
             const db = obtenerDB();
             const idEdit = document.getElementById("jornadaIdEdit").value;
-
             const nuevaJornada = {
                 id: idEdit ? idEdit : "anh_" + Date.now(),
                 fecha: document.getElementById("inputFecha").value,
@@ -1130,26 +1065,21 @@
                 imagen: document.getElementById("inputImagenUrl").value.trim(),
                 destacada: document.getElementById("inputDestacadaPortada").checked
             };
-
             if (idEdit) {
                 const index = db.jornadas.findIndex(item => item.id === idEdit);
-                if (index !== -1) {
-                    db.jornadas[index] = nuevaJornada;
-                }
+                if (index !== -1) db.jornadas[index] = nuevaJornada;
             } else {
                 db.jornadas.push(nuevaJornada);
             }
-
             guardarDB(db);
             limpiarFormularioJornada();
-            alert("¡Publicación guardada y sincronizada en el portal con éxito!");
+            alert("¡Publicación guardada y sincronizada en Firebase!");
         }
 
         function editarJornada(id) {
             const db = obtenerDB();
             const j = db.jornadas.find(item => item.id === id);
             if (!j) return;
-
             document.getElementById("jornadaIdEdit").value = j.id;
             document.getElementById("inputFecha").value = j.fecha;
             document.getElementById("inputLugar").value = j.lugar;
@@ -1159,18 +1089,16 @@
             document.getElementById("inputContenidoNoticia").value = j.contenido;
             document.getElementById("inputImagenUrl").value = j.imagen || "";
             document.getElementById("inputDestacadaPortada").checked = j.destacada || false;
-
             document.getElementById("formTitulo").innerHTML = `<i class="fa-solid fa-pen-to-square text-[#B48A3E] mr-2"></i> Editando Publicación: ${j.titulo}`;
             document.getElementById("btnGuardarJornada").innerText = "Actualizar Publicación";
             window.scrollTo({ top: document.getElementById("jornadaForm").offsetTop - 100, behavior: 'smooth' });
         }
 
         function eliminarJornada(id) {
-            if (!confirm("¿Estás seguro de que deseas eliminar esta publicación del portal?")) return;
+            if (!confirm("¿Estás seguro de eliminar esta publicación de la nube?")) return;
             const db = obtenerDB();
             db.jornadas = db.jornadas.filter(item => item.id !== id);
             guardarDB(db);
-            alert("Publicación eliminada correctamente.");
         }
 
         function limpiarFormularioJornada() {
@@ -1181,11 +1109,9 @@
             document.getElementById("inputFecha").value = new Date().toISOString().split('T')[0];
         }
 
-        // --- GUARDAR TEXTOS Y ORDEN ---
         function guardarTextosPublicos(e) {
             e.preventDefault();
             const db = obtenerDB();
-
             db.textos.acercaBadge = document.getElementById("editAcercaBadge").value;
             db.textos.acercaTitulo = document.getElementById("editAcercaTitulo").value;
             db.textos.acercaTexto = document.getElementById("editAcercaTexto").value;
@@ -1195,18 +1121,15 @@
             db.textos.labelGranTotal = document.getElementById("editLabelGranTotal").value;
             db.textos.labelKilos = document.getElementById("editLabelKilos").value;
             db.textos.labelCarbono = document.getElementById("editLabelCarbono").value;
-
             db.orden.acerca = parseInt(document.getElementById("ordenAcerca").value) || 1;
             db.orden.tarjetas = parseInt(document.getElementById("ordenTarjetas").value) || 2;
             db.orden.grafico = parseInt(document.getElementById("ordenGrafico").value) || 3;
             db.orden.materiales = parseInt(document.getElementById("ordenMateriales").value) || 4;
             db.orden.informes = parseInt(document.getElementById("ordenInformes").value) || 5;
-
             guardarDB(db);
-            alert("¡Textos institucionales y orden de diseño actualizados con éxito!");
+            alert("¡Textos y orden guardados en Firebase!");
         }
 
-        // --- LOGO Y CREDENCIALES ---
         function subirLogoArchivo(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1215,7 +1138,7 @@
                 const db = obtenerDB();
                 db.logoUrl = event.target.result;
                 guardarDB(db);
-                alert("Sello institucional actualizado correctamente.");
+                alert("Sello institucional actualizado en la nube.");
             };
             reader.readAsDataURL(file);
         }
@@ -1224,35 +1147,28 @@
             const db = obtenerDB();
             db.logoUrl = "";
             guardarDB(db);
-            alert("Sello por defecto restaurado.");
         }
 
         function actualizarCredenciales(e) {
             e.preventDefault();
             const db = obtenerDB();
-            const nuevoUsr = document.getElementById("editAdminUsuario").value.trim();
-            const nuevoCor = document.getElementById("editAdminCorreo").value.trim();
+            db.admin.usuario = document.getElementById("editAdminUsuario").value.trim();
+            db.admin.correo = document.getElementById("editAdminCorreo").value.trim();
             const nuevaPwd = document.getElementById("editAdminClave").value.trim();
-
-            db.admin.usuario = nuevoUsr;
-            db.admin.correo = nuevoCor;
             if (nuevaPwd) {
                 if (nuevaPwd.length < 6) {
-                    alert("La nueva clave debe tener al menos 6 caracteres.");
+                    alert("La clave debe tener al menos 6 caracteres.");
                     return;
                 }
                 db.admin.clave = nuevaPwd;
             }
-
             guardarDB(db);
-            alert("¡Credenciales editoriales actualizadas con éxito!");
+            alert("¡Credenciales actualizadas en Firebase!");
         }
 
         function cargarDatosBaseAdmin() {
-            if (!confirm("¿Deseas recargar las publicaciones institucionales históricas base de la Academia?")) return;
-            localStorage.removeItem(DB_KEY);
-            renderizarTodo();
-            alert("¡Datos institucionales base cargados con éxito!");
+            if (!confirm("¿Restaurar las noticias históricas iniciales en Firebase?")) return;
+            guardarDB(obtenerEstructuraPorDefecto());
         }
     </script>
 </body>
