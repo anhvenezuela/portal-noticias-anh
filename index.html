@@ -12,13 +12,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Playfair Display e Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- Chart.js para gráficos estadísticos -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Firebase App y Firestore SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #121211; color: #E5E2DC; }
         .font-serif { font-family: 'Playfair Display', serif; }
         .letra-capitular::first-letter {
             font-family: 'Playfair Display', serif;
@@ -28,454 +28,215 @@
             padding-right: 0.75rem;
             padding-top: 0.2rem;
             font-weight: bold;
-            color: #1B365D;
+            color: #C29B38;
         }
     </style>
 </head>
-<body class="bg-[#FAF8F5] text-[#1C1B18] min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col selection:bg-[#C29B38] selection:text-black">
 
-    <!-- HEADER / NAVEGACIÓN -->
-    <header class="bg-[#1B365D] text-white shadow-md border-b-4 border-[#B48A3E]">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div id="headerLogoContainer" class="bg-white p-1.5 rounded-full text-[#1B365D] font-bold text-xl flex items-center justify-center w-12 h-12 overflow-hidden shadow-sm">
-                    <i class="fa-solid fa-landmark-dome"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight font-serif">Academia Nacional de la Historia</h1>
-                    <p class="text-xs text-[#B48A3E] flex items-center gap-2 font-medium">
-                        <span>Portal Oficial de Noticias e Investigación | RIF: G-20001234-5</span>
-                        <span id="cloudStatus" class="inline-flex items-center gap-1 bg-[#152946] text-amber-200 px-2 py-0.5 rounded-full text-[10px]">
-                            <i class="fa-solid fa-cloud"></i> Conectando a Nube...
-                        </span>
-                    </p>
-                </div>
-            </div>
+    <!-- BARRA SUPERIOR INSTITUCIONAL -->
+    <div class="bg-[#1A1A18] text-xs text-[#A8A49C] px-4 py-2 border-b border-[#2C2B27]">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <button onclick="cambiarVista('publico')" id="btnPublico" class="px-4 py-2 bg-[#284a7a] hover:bg-[#152946] rounded-lg text-sm font-medium transition shadow-sm border border-[#375e97] cursor-pointer">
-                    <i class="fa-solid fa-globe mr-2"></i> Vista Pública
-                </button>
-                <button onclick="abrirModalAcceso()" id="btnAdminNav" class="px-4 py-2 bg-[#12223b] hover:bg-[#0a1526] rounded-lg text-sm font-medium transition shadow-sm border border-[#B48A3E] text-amber-100 cursor-pointer">
-                    <i class="fa-solid fa-lock mr-2"></i> Mesa de Redacción
-                </button>
+                <span class="font-serif italic">Academia Nacional de la Historia</span>
+                <span class="text-[#C29B38]" id="cloudStatus"><i class="fa-solid fa-cloud"></i> Conectado a Firebase</span>
             </div>
+            <div class="flex items-center gap-4">
+                <button onclick="cambiarVista('publico')" class="hover:text-white transition"><i class="fa-solid fa-house mr-1"></i> Portada</button>
+                <button onclick="abrirModalAcceso()" class="hover:text-[#C29B38] transition"><i class="fa-solid fa-lock mr-1"></i> Mesa de Redacción</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CABECERA PRINCIPAL TIPO REVISTA -->
+    <header class="bg-[#121211] border-b border-[#2C2B27] py-6 px-4 text-center">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center space-y-3">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight font-serif text-[#F4F1EA]">
+                gaceta <span class="text-xs uppercase font-sans tracking-widest text-[#C29B38] block md:inline mt-1 md:mt-0 font-semibold">Histórica</span>
+            </h1>
+            <p class="text-xs text-[#A8A49C] font-serif italic tracking-wide">Una mirada crítica y documental desde la Academia. Desde todos partes.</p>
+        </div>
+        <!-- Menú de Secciones -->
+        <nav class="max-w-4xl mx-auto mt-6 flex flex-wrap justify-center items-center gap-6 text-xs uppercase tracking-widest font-semibold text-[#C5C0B5] border-t border-b border-[#2C2B27] py-3">
+            <a href="#" onclick="filtrarPorSeccionNav('todos'); return false;" class="hover:text-[#C29B38] transition">Portada</a>
+            <a href="#" onclick="filtrarPorSeccionNav('Institucional y Directiva'); return false;" class="hover:text-[#C29B38] transition">Institucional</a>
+            <a href="#" onclick="filtrarPorSeccionNav('Individuos de Número / Conmemoraciones'); return false;" class="hover:text-[#C29B38] transition">Individuos</a>
+            <a href="#" onclick="filtrarPorSeccionNav('Investigaciones y Artículos'); return false;" class="hover:text-[#C29B38] transition">Investigaciones</a>
+            <a href="#" onclick="filtrarPorSeccionNav('Boletín y Publicaciones'); return false;" class="hover:text-[#C29B38] transition">Boletín</a>
+            <a href="#" onclick="filtrarPorSeccionNav('Eventos, Conferencias y Concursos'); return false;" class="hover:text-[#C29B38] transition">Conferencias</a>
+            <button onclick="toggleBuscadorHeader()" class="text-[#C29B38] hover:text-white transition"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+        </nav>
+        <!-- Buscador Desplegable -->
+        <div id="buscadorHeaderBox" class="hidden max-w-xl mx-auto mt-4 p-3 bg-[#1A1A18] rounded-xl border border-[#2C2B27] flex gap-2">
+            <input type="text" id="filtroTexto" oninput="renderizarTodoPortal()" placeholder="Buscar por título, autor o tema..." class="w-full bg-[#121211] border border-[#2C2B27] px-3 py-1.5 rounded-lg text-xs text-white focus:outline-none focus:border-[#C29B38]">
+            <input type="date" id="filtroFecha" oninput="renderizarTodoPortal()" class="bg-[#121211] border border-[#2C2B27] px-3 py-1.5 rounded-lg text-xs text-white focus:outline-none">
+            <button onclick="limpiarFiltros()" class="px-3 py-1.5 bg-[#2C2B27] hover:bg-[#383733] text-white rounded-lg text-xs">Limpiar</button>
         </div>
     </header>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-8">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-12">
 
-        <!-- MODAL DE ACCESO EXCLUSIVO DE ADMINISTRADOR -->
-        <div id="authModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-                <div class="flex justify-between items-center mb-4 border-b pb-3">
-                    <h3 class="text-lg font-bold text-[#1B365D] font-serif">
-                        <i class="fa-solid fa-shield-halved text-[#B48A3E] mr-2"></i> Acceso Mesa de Redacción
+        <!-- MODAL DE ACCESO DE ADMINISTRADOR -->
+        <div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-[#1A1A18] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#2C2B27] text-[#E5E2DC]">
+                <div class="flex justify-between items-center mb-4 border-b border-[#2C2B27] pb-3">
+                    <h3 class="text-lg font-bold font-serif text-[#F4F1EA]">
+                        <i class="fa-solid fa-shield-halved text-[#C29B38] mr-2"></i> Mesa de Redacción
                     </h3>
-                    <button onclick="cerrarModalAcceso()" class="text-slate-400 hover:text-slate-600 cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    <button onclick="cerrarModalAcceso()" class="text-[#A8A49C] hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
 
                 <form id="formLogin" onsubmit="verificarLogin(event)" class="space-y-4">
-                    <p class="text-xs text-slate-500">Acceso exclusivo para editores y Junta Directiva de la Academia.</p>
+                    <p class="text-xs text-[#A8A49C]">Acceso exclusivo para editores y miembros de la Junta Directiva.</p>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Usuario:</label>
-                        <input type="text" id="loginUsuario" required placeholder="Usuario autorizado" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
+                        <label class="block text-xs font-semibold text-[#C5C0B5] mb-1">Usuario:</label>
+                        <input type="text" id="loginUsuario" required class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white focus:ring-2 focus:ring-[#C29B38] focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña Secreta:</label>
-                        <input type="password" id="loginClave" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
+                        <label class="block text-xs font-semibold text-[#C5C0B5] mb-1">Contraseña:</label>
+                        <input type="password" id="loginClave" required class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white focus:ring-2 focus:ring-[#C29B38] focus:outline-none">
                     </div>
                     <div class="flex justify-between items-center pt-1">
-                        <button type="button" onclick="mostrarRecuperacion()" class="text-xs text-[#1B365D] hover:underline font-medium">¿Olvidaste tu clave?</button>
+                        <button type="button" onclick="mostrarRecuperacion()" class="text-xs text-[#C29B38] hover:underline">¿Olvidaste tu clave?</button>
                     </div>
-                    <div class="flex justify-end gap-2 pt-2 border-t">
-                        <button type="button" onclick="cerrarModalAcceso()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm">Cancelar</button>
-                        <button type="submit" class="px-5 py-2 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-lg text-sm font-medium cursor-pointer">Iniciar Sesión</button>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-[#2C2B27]">
+                        <button type="button" onclick="cerrarModalAcceso()" class="px-4 py-2 text-[#A8A49C] hover:bg-[#2C2B27] rounded-lg text-sm">Cancelar</button>
+                        <button type="submit" class="px-5 py-2 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-sm">Entrar</button>
                     </div>
                 </form>
 
                 <form id="formRecuperar" onsubmit="procesarRecuperacion(event)" class="hidden space-y-4">
-                    <p class="text-xs text-slate-600">Ingresa tu <strong>correo electrónico</strong> registrado para verificar identidad:</p>
+                    <p class="text-xs text-[#A8A49C]">Ingresa tu correo institucional registrado:</p>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Correo Electrónico:</label>
-                        <input type="email" id="recCorreo" required placeholder="correo@academia.org" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
+                        <input type="email" id="recCorreo" required placeholder="correo@academia.org" class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white">
                     </div>
-                    <div id="nuevaClaveBox" class="hidden space-y-3 pt-2 border-t">
-                        <div class="bg-amber-50 text-[#1B365D] p-2.5 rounded-lg text-xs border border-amber-200">
-                            <i class="fa-solid fa-check-circle mr-1 text-[#B48A3E]"></i> Correo verificado (<span id="usuarioRecuperado" class="font-bold"></span>). Define tu nueva clave:
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nueva Contraseña:</label>
-                            <input type="password" id="recNuevaClave" minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
-                        </div>
+                    <div id="nuevaClaveBox" class="hidden space-y-3">
+                        <div class="bg-[#2C2B27] text-amber-200 p-2.5 rounded-lg text-xs">Correo verificado. Define tu nueva clave:</div>
+                        <input type="password" id="recNuevaClave" minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white">
                     </div>
                     <div class="flex justify-between items-center pt-2">
-                        <button type="button" onclick="abrirModalAcceso()" class="text-xs text-slate-500 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i> Volver</button>
-                        <button type="submit" id="btnRecuperarSubmit" class="px-4 py-2 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-lg text-sm font-medium cursor-pointer">Verificar Correo</button>
+                        <button type="button" onclick="abrirModalAcceso()" class="text-xs text-[#A8A49C]">Volver</button>
+                        <button type="submit" id="btnRecuperarSubmit" class="px-4 py-2 bg-[#C29B38] text-black font-semibold rounded-lg text-sm">Verificar</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- VISTA PÚBLICA -->
-        <div id="vistaPublica" class="space-y-8">
+        <!-- VISTA PÚBLICA (PORTADA ESTILO REVISTA) -->
+        <div id="vistaPublica" class="space-y-12">
             
-            <!-- BLOQUE 1: ACERCA DE LA INSTITUCIÓN -->
-            <div id="bloqueAcerca" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center gap-6">
-                <div class="p-4 bg-[#FAF8F5] text-[#1B365D] border border-[#B48A3E]/30 rounded-2xl text-4xl flex-shrink-0">
-                    <i class="fa-solid fa-book-bookmark"></i>
-                </div>
-                <div class="space-y-2 text-center md:text-left flex-grow">
-                    <span id="pubAcercaBadge" class="text-xs font-bold text-[#B48A3E] bg-amber-50 px-3 py-1 rounded-full uppercase tracking-wider border border-amber-200">Institución Bicentenaria</span>
-                    <h2 id="pubAcercaTitulo" class="text-xl md:text-2xl font-bold text-[#1B365D] font-serif">Salvaguarda de la Memoria Histórica Nacional</h2>
-                    <p id="pubAcercaTexto" class="text-sm text-slate-600 leading-relaxed font-serif">Fundada para promover la investigación rigurosa, el resguardo documental y la divulgación del devenir histórico venezolano y americano con estricto rigor crítico y académico.</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <a href="https://anhvenezuela.org" target="_blank" class="px-5 py-3 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-2">
-                        <i class="fa-solid fa-globe text-sm"></i> Sitio Institucional
-                    </a>
-                </div>
+            <!-- NOTICIA DESTACADA DE PORTADA (GRAN FORMATO) -->
+            <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-[#2C2B27] pb-12">
+                <!-- Se inyecta dinámicamente la destacada -->
             </div>
 
-            <!-- BLOQUE 2: TARJETAS DE RESUMEN / ESTADÍSTICAS EDITORIALES -->
-            <div id="bloqueTarjetasResumen" class="space-y-6">
-                <div class="bg-gradient-to-r from-[#1B365D] to-[#284a7a] rounded-2xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6 border-b-4 border-[#B48A3E]">
-                    <div class="space-y-2 text-center md:text-left">
-                        <span id="pubBannerBadge" class="bg-[#B48A3E] text-white text-xs px-3 py-1 rounded-full uppercase font-semibold tracking-wider">Boletín en Vivo</span>
-                        <h2 id="pubBannerTitulo" class="text-2xl md:text-3xl font-bold font-serif">Crónica y Actualidad Historiográfica</h2>
-                        <p id="pubBannerSub" class="text-slate-200 text-sm max-w-xl font-serif">Accede a las últimas investigaciones, incorporaciones de nuevos Individuos de Número y convocatorias oficiales.</p>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 text-center min-w-[200px]">
-                        <span id="pubLabelGranTotal" class="block text-xs text-amber-200 uppercase font-medium">Publicaciones Activas</span>
-                        <span id="pubGranTotal" class="text-3xl font-extrabold text-white">0</span>
-                    </div>
+            <!-- GRILLA DE ARTÍCULOS RECIENTES -->
+            <div class="space-y-6">
+                <div class="border-b border-[#2C2B27] pb-3 flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-[#C29B38]">Últimas Publicaciones e Investigaciones</h3>
+                    <span id="contadorPublicaciones" class="text-xs text-[#A8A49C]"></span>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
-                        <div class="p-4 bg-amber-50 text-[#B48A3E] rounded-2xl text-2xl border border-amber-100"><i class="fa-solid fa-scroll"></i></div>
-                        <div>
-                            <p id="pubLabelKilos" class="text-xs text-slate-500 uppercase font-semibold">Artículos y Ensayos Publicados</p>
-                            <h3 id="pubTotalKilos" class="text-2xl font-bold text-[#1B365D]">0 Registrados</h3>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
-                        <div class="p-4 bg-blue-50 text-[#1B365D] rounded-2xl text-2xl border border-blue-100"><i class="fa-solid fa-award"></i></div>
-                        <div>
-                            <p id="pubLabelCarbono" class="text-xs text-slate-500 uppercase font-semibold">Condecoraciones y Premios</p>
-                            <h3 id="pubHuellaCarbono" class="text-2xl font-bold text-[#1B365D]">Activos</h3>
-                        </div>
-                    </div>
-                </div>
+                <div id="pubListaInformes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                <!-- Paginación -->
+                <div id="paginacionContenedor" class="flex justify-center gap-2 pt-6"></div>
             </div>
 
-            <!-- BLOQUE 3: GRÁFICO HISTÓRICO ANUAL -->
-            <div id="bloqueGrafico" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-[#1B365D] font-serif flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-[#B48A3E]"></i> Producción Historiográfica por Años
-                        </h3>
-                        <p class="text-xs text-slate-500">Distribución cronológica de las publicaciones y boletines de la Academia.</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Filtrar por Sección:</label>
-                            <select id="filtroMaterialGrafico" onchange="actualizarGraficoLineasAnual()" class="px-3 py-1.5 border rounded-lg text-xs bg-white font-medium focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
-                                <option value="todos">Todas las Secciones</option>
-                                <option value="Institucional y Directiva">Institucional y Directiva</option>
-                                <option value="Individuos de Número / Conmemoraciones">Individuos de Número</option>
-                                <option value="Investigaciones y Artículos">Investigaciones y Artículos</option>
-                                <option value="Boletín y Publicaciones">Boletín y Publicaciones</option>
-                                <option value="Eventos, Conferencias y Concursos">Eventos y Concursos</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="relative h-80 w-full">
-                    <canvas id="lineChartCanvas"></canvas>
-                </div>
-            </div>
-
-            <!-- BLOQUE 4: DISTRIBUCIÓN POR CATEGORÍAS ACADÉMICAS -->
-            <div id="bloqueMaterialesPorcentaje" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
-                <h3 class="text-lg font-bold text-[#1B365D] font-serif mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-[#B48A3E]"></i> Distribución de Contenidos por Categorías Académicas
-                </h3>
-                <div id="pubListaMateriales" class="space-y-4"></div>
-            </div>
-
-            <!-- BLOQUE 5: CENTRO DE INFORMES / NOTICIAS Y BUSCADOR -->
-            <div id="bloqueInformesBuscador" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6">
-                <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
-                    <button onclick="toggleAcordeonBuscador()" class="w-full px-5 py-4 flex justify-between items-center text-left font-bold text-[#1B365D] hover:bg-slate-100 transition cursor-pointer">
-                        <span class="flex items-center gap-2 text-base font-serif">
-                            <i class="fa-solid fa-magnifying-glass text-[#B48A3E]"></i> Buscador Avanzado en el Archivo de Noticias
-                        </span>
-                        <i id="iconoAcordeon" class="fa-solid fa-chevron-down text-slate-500 transition-transform duration-300"></i>
-                    </button>
-                    <div id="contenidoAcordeon" class="hidden p-5 border-t border-slate-200 bg-white grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Seleccionar Noticia Directa:</label>
-                            <select id="selectInformeRapido" onchange="seleccionarInformeDirecto(this.value)" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none bg-white">
-                                <option value="">-- Todas las publicaciones --</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Buscar por Fecha:</label>
-                            <input type="date" id="filtroFecha" oninput="filtrarInformesPublicos()" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Buscar por Título, Autor o Tema:</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="filtroTexto" oninput="filtrarInformesPublicos()" placeholder="ej. Straka, Individuo, Boletín..." class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1B365D] focus:outline-none">
-                                <button onclick="limpiarFiltrosBusqueda()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs rounded-lg font-medium transition cursor-pointer" title="Limpiar filtros">Limpiar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-lg font-bold text-[#1B365D] font-serif mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-newspaper text-[#B48A3E]"></i> Publicaciones y Comunicados Oficiales
-                    </h3>
-                    <p class="text-sm text-slate-600 mb-6 font-serif">Selecciona una publicación para leer el texto completo, ver detalles académicos y obtener la cita bibliográfica automática:</p>
-                    
-                    <div id="pubListaInformes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                    <div id="paginacionContenedor" class="flex flex-wrap items-center justify-center gap-2 mt-8 pt-4 border-t border-slate-200"></div>
-                </div>
-            </div>
         </div>
 
         <!-- VISTA DE ADMINISTRACIÓN (MESA DE REDACCIÓN) -->
-        <div id="vistaAdmin" class="hidden space-y-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div id="vistaAdmin" class="hidden space-y-8 bg-[#1A1A18] p-6 md:p-8 rounded-2xl border border-[#2C2B27]">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#2C2B27] pb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-[#1B365D] font-serif"><i class="fa-solid fa-feather-pointed text-[#B48A3E] mr-2"></i> Mesa de Redacción y Sincronización</h2>
-                    <p class="text-sm text-slate-500">Editor en jefe: <strong id="adminNombreDisplay" class="text-[#1B365D]">Miembro de la Junta</strong>.</p>
+                    <h2 class="text-xl font-bold font-serif text-[#F4F1EA]"><i class="fa-solid fa-feather-pointed text-[#C29B38] mr-2"></i> Mesa de Redacción y Edición</h2>
+                    <p class="text-xs text-[#A8A49C]">Editor autorizado: <strong id="adminNombreDisplay" class="text-white">Junta Directiva</strong></p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="cargarDatosBaseAdmin()" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-[#1B365D] rounded-lg text-xs font-medium transition cursor-pointer border border-amber-200">
+                    <button onclick="cargarDatosBaseAdmin()" class="px-3 py-2 bg-[#2C2B27] hover:bg-[#383733] text-amber-200 rounded-lg text-xs transition border border-amber-500/20">
                         <i class="fa-solid fa-database mr-1"></i> Restaurar Noticias Base
                     </button>
-                    <button onclick="cerrarAdmin()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition cursor-pointer">
-                        <i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar Sesión
+                    <button onclick="cerrarAdmin()" class="px-4 py-2 bg-[#121211] hover:bg-[#2C2B27] text-white rounded-lg text-xs transition">
+                        <i class="fa-solid fa-right-from-bracket mr-2"></i> Salir
                     </button>
                 </div>
             </div>
 
-            <!-- GESTIÓN DE ORDEN DE LOS BLOQUES -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                <h3 class="text-base font-bold text-[#1B365D] font-serif flex items-center gap-2 border-b pb-2">
-                    <i class="fa-solid fa-list-ol text-[#B48A3E]"></i> Orden de las Secciones en el Portal Público
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
-                    <div class="bg-slate-50 p-3 rounded-xl border">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Acerca de la Institución:</label>
-                        <input type="number" id="ordenAcerca" min="1" max="5" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white">
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tarjetas y Banner:</label>
-                        <input type="number" id="ordenTarjetas" min="1" max="5" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white">
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Gráfico Histórico:</label>
-                        <input type="number" id="ordenGrafico" min="1" max="5" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white">
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Categorías Académicas:</label>
-                        <input type="number" id="ordenMateriales" min="1" max="5" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white">
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Buscador y Noticias:</label>
-                        <input type="number" id="ordenInformes" min="1" max="5" class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white">
-                    </div>
-                </div>
-            </div>
+            <!-- FORMULARIO DE CREACIÓN / EDICIÓN -->
+            <form id="jornadaForm" onsubmit="guardarJornada(event)" class="space-y-6 bg-[#121211] p-6 rounded-xl border border-[#2C2B27]">
+                <input type="hidden" id="jornadaIdEdit" value="">
+                
+                <h3 id="formTitulo" class="text-base font-bold font-serif text-[#C29B38]">Redactar Nuevo Artículo o Noticia</h3>
 
-            <!-- GESTIÓN DE TEXTOS Y TÍTULOS -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                <h3 class="text-base font-bold text-[#1B365D] font-serif flex items-center gap-2 border-b pb-2">
-                    <i class="fa-solid fa-pen-to-square text-[#B48A3E]"></i> Edición de Textos Institucionales
-                </h3>
-                <form onsubmit="guardarTextosPublicos(event)" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Etiqueta "Acerca" (Badge):</label>
-                            <input type="text" id="editAcercaBadge" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Título "Acerca de la Institución":</label>
-                            <input type="text" id="editAcercaTitulo" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Fecha:</label>
+                        <input type="date" id="inputFecha" required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Descripción de la Institución:</label>
-                        <textarea id="editAcercaTexto" rows="2" required class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
+                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Sección Académica:</label>
+                        <select id="inputLugar" required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
+                            <option value="Institucional y Directiva">Institucional y Directiva</option>
+                            <option value="Individuos de Número / Conmemoraciones">Individuos de Número / Conmemoraciones</option>
+                            <option value="Investigaciones y Artículos">Investigaciones y Artículos</option>
+                            <option value="Boletín y Publicaciones">Boletín y Publicaciones</option>
+                            <option value="Eventos, Conferencias y Concursos">Eventos, Conferencias y Concursos</option>
+                        </select>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Título del Banner Principal:</label>
-                            <input type="text" id="editBannerTitulo" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Subtítulo del Banner:</label>
-                            <input type="text" id="editBannerSub" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Etiqueta Contador Total:</label>
-                            <input type="text" id="editLabelGranTotal" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                        </div>
+                    <div>
+                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Autor / Investigador:</label>
+                        <input type="text" id="inputAutor" placeholder="ej. Dr. Tomás Straka" required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Etiqueta Tarjeta Artículos:</label>
-                            <input type="text" id="editLabelKilos" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Etiqueta Tarjeta Premios:</label>
-                            <input type="text" id="editLabelCarbono" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between pt-2 border-t">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="editAcercaVisible" class="w-4 h-4 text-[#1B365D] rounded">
-                            <span class="text-xs font-semibold text-slate-700">Mostrar sección "Acerca de la Institución" en el portal</span>
-                        </label>
-                        <button type="submit" class="px-5 py-2 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-lg text-xs font-medium transition cursor-pointer">Guardar Textos Institucionales</button>
-                    </div>
-                </form>
-            </div>
+                </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- LOGO INSTITUCIONAL -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                    <h3 class="text-base font-bold text-[#1B365D] font-serif flex items-center gap-2 border-b pb-2">
-                        <i class="fa-solid fa-shield text-[#B48A3E]"></i> Sello o Escudo Institucional
-                    </h3>
-                    <div class="flex items-center gap-4">
-                        <div id="adminLogoPreview" class="w-16 h-16 rounded-full border-2 border-amber-300 flex items-center justify-center bg-slate-50 overflow-hidden text-[#1B365D] text-2xl">
-                            <i class="fa-solid fa-landmark-dome"></i>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Título del Artículo:</label>
+                        <input type="text" id="inputTituloNoticia" placeholder="Título principal..." required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Sumario o Entradilla:</label>
+                        <textarea id="inputSumarioNoticia" rows="2" placeholder="Breve resumen para la portada..." required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Cuerpo Completo:</label>
+                        <textarea id="inputContenidoNoticia" rows="6" placeholder="Contenido íntegro del artículo..." required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white font-serif"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-[#C5C0B5] mb-1">URL de Imagen Ilustrativa:</label>
+                            <input type="url" id="inputImagenUrl" placeholder="https://..." class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
                         </div>
-                        <div class="flex-1 space-y-2">
-                            <input type="file" id="inputLogoFile" accept="image/*" onchange="subirLogoArchivo(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-[#1B365D] hover:file:bg-amber-100 cursor-pointer">
-                            <button type="button" onclick="restaurarLogoDefecto()" class="text-xs text-rose-600 hover:underline">Restaurar sello por defecto</button>
+                        <div class="flex items-center pt-6">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="inputDestacadaPortada" class="w-4 h-4 accent-[#C29B38]">
+                                <span class="text-xs font-bold text-[#F4F1EA]">Marcar como Noticia Principal de Portada</span>
+                            </label>
                         </div>
                     </div>
                 </div>
 
-                <!-- SEGURIDAD Y CREDENCIALES -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                    <h3 class="text-base font-bold text-[#1B365D] font-serif flex items-center gap-2 border-b pb-2">
-                        <i class="fa-solid fa-user-shield text-[#B48A3E]"></i> Credenciales de Acceso Editorial
-                    </h3>
-                    <form onsubmit="actualizarCredenciales(event)" class="space-y-3">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Usuario:</label>
-                                <input type="text" id="editAdminUsuario" required class="w-full px-3 py-1.5 border rounded-lg text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Correo de Resguardo:</label>
-                                <input type="email" id="editAdminCorreo" required class="w-full px-3 py-1.5 border rounded-lg text-xs">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Nueva Contraseña Secreta (opcional):</label>
-                            <input type="password" id="editAdminClave" minlength="6" placeholder="••••••••" class="w-full px-3 py-1.5 border rounded-lg text-xs">
-                        </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-4 py-1.5 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-lg text-xs font-medium transition cursor-pointer">Actualizar Credenciales</button>
-                        </div>
-                    </form>
+                <div class="flex justify-end gap-3 pt-4 border-t border-[#2C2B27]">
+                    <button type="button" onclick="limpiarFormularioJornada()" class="px-4 py-2 bg-[#2C2B27] hover:bg-[#383733] text-white rounded-lg text-xs">Cancelar</button>
+                    <button type="submit" id="btnGuardarJornada" class="px-6 py-2 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-xs">Publicar Artículo</button>
                 </div>
-            </div>
+            </form>
 
-            <!-- FORMULARIO DE CREACIÓN / EDICIÓN DE NOTICIA -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h3 id="formTitulo" class="text-lg font-bold text-[#1B365D] font-serif mb-4"><i class="fa-solid fa-circle-plus text-[#B48A3E] mr-2"></i> Redactar Nueva Noticia o Artículo</h3>
-                <form id="jornadaForm" onsubmit="guardarJornada(event)" class="space-y-6">
-                    <input type="hidden" id="jornadaIdEdit" value="">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Fecha de Publicación:</label>
-                            <input type="date" id="inputFecha" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1B365D] focus:outline-none text-sm">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Categoría Académica:</label>
-                            <select id="inputLugar" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1B365D] focus:outline-none bg-white text-sm">
-                                <option value="Institucional y Directiva">Institucional y Directiva</option>
-                                <option value="Individuos de Número / Conmemoraciones">Individuos de Número / Conmemoraciones</option>
-                                <option value="Investigaciones y Artículos">Investigaciones y Artículos</option>
-                                <option value="Boletín y Publicaciones">Boletín y Publicaciones</option>
-                                <option value="Eventos, Conferencias y Concursos">Eventos, Conferencias y Concursos</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Autor / Investigador / Relator:</label>
-                            <input type="text" id="inputAutor" placeholder="ej. Dr. Tomás Straka / Secretaría" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1B365D] focus:outline-none text-sm">
-                        </div>
-                    </div>
-
-                    <div class="space-y-4 pt-2 border-t">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Título de la Noticia o Artículo:</label>
-                            <input type="text" id="inputTituloNoticia" placeholder="Ej. Incorporación del nuevo Individuo de Número..." required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1B365D] focus:outline-none text-sm">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Sumario o Entradilla (Resumen breve):</label>
-                            <textarea id="inputSumarioNoticia" rows="2" placeholder="Breve síntesis para la portada..." required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1B365D] focus:outline-none text-sm"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Cuerpo Completo del Artículo (con letra capitular automática):</label>
-                            <textarea id="inputContenidoNoticia" rows="6" placeholder="Desarrollo completo de la noticia o artículo académico..." required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1B365D] focus:outline-none text-sm font-serif"></textarea>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">URL de Imagen Ilustrativa (Opcional):</label>
-                                <input type="url" id="inputImagenUrl" placeholder="https://ejemplo.com/imagen.jpg" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1B365D] focus:outline-none text-sm">
-                            </div>
-                            <div class="flex items-center pt-6">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="inputDestacadaPortada" class="w-5 h-5 text-[#1B365D] rounded">
-                                    <span class="text-sm font-bold text-[#1B365D]">Marcar como Noticia Destacada de Portada</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end gap-3 pt-4 border-t">
-                        <button type="button" onclick="limpiarFormularioJornada()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition cursor-pointer">Cancelar / Limpiar</button>
-                        <button type="submit" id="btnGuardarJornada" class="px-6 py-2 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-lg text-sm font-medium shadow-sm transition cursor-pointer">Publicar Noticia</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- TABLA DE GESTIÓN DE NOTICIAS -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                <h3 class="text-base font-bold text-[#1B365D] font-serif flex items-center gap-2 border-b pb-2">
-                    <i class="fa-solid fa-table-list text-[#B48A3E]"></i> Archivo de Publicaciones Registradas
-                </h3>
+            <!-- TABLA DE GESTIÓN -->
+            <div class="space-y-4">
+                <h3 class="text-base font-bold font-serif text-[#F4F1EA]">Archivo de Publicaciones</h3>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
+                    <table class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-slate-100 text-slate-700 text-xs uppercase font-semibold">
+                            <tr class="bg-[#121211] text-[#A8A49C] uppercase border-b border-[#2C2B27]">
                                 <th class="p-3">Fecha</th>
                                 <th class="p-3">Título</th>
-                                <th class="p-3">Categoría</th>
+                                <th class="p-3">Sección</th>
                                 <th class="p-3">Autor</th>
                                 <th class="p-3 text-center">Portada</th>
                                 <th class="p-3 text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tablaAdminJornadas" class="divide-y divide-slate-200"></tbody>
+                        <tbody id="tablaAdminJornadas" class="divide-y divide-[#2C2B27]"></tbody>
                     </table>
                 </div>
             </div>
@@ -483,53 +244,52 @@
 
     </main>
 
-    <!-- FOOTER INSTITUCIONAL -->
-    <footer class="bg-[#1B365D] text-amber-100 py-8 mt-auto border-t-4 border-[#B48A3E]">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-serif">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-landmark text-[#B48A3E] text-base"></i>
-                <span>Academia Nacional de la Historia — Caracas, Venezuela. Todos los derechos reservados.</span>
+    <!-- FOOTER TIPO REVISTA -->
+    <footer class="bg-[#0E0E0D] border-t border-[#2C2B27] py-12 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-[#A8A49C]">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-landmark text-[#C29B38] text-lg"></i>
+                <span class="font-serif">Academia Nacional de la Historia — Caracas, Venezuela.</span>
             </div>
-            <div class="flex space-x-4">
-                <a href="https://anhvenezuela.org" target="_blank" class="hover:underline text-amber-200">Portal Web</a>
-                <a href="#" onclick="abrirModalAcceso(); return false;" class="hover:underline text-amber-200">Mesa de Redacción</a>
+            <div class="flex space-x-6 font-serif">
+                <a href="https://anhvenezuela.org" target="_blank" class="hover:text-white">Sitio Institucional</a>
+                <a href="#" onclick="abrirModalAcceso(); return false;" class="hover:text-white">Mesa de Redacción</a>
             </div>
         </div>
     </footer>
 
-    <!-- MODAL DE LECTURA COMPLETA DE LA NOTICIA / ARTÍCULO -->
-    <div id="modalLectura" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div id="contenidoModalLectura" class="bg-[#FAF8F5] rounded-2xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-slate-300 max-h-[90vh] overflow-y-auto space-y-6">
-            <div class="flex justify-between items-start border-b pb-4">
+    <!-- MODAL DE LECTURA COMPLETA -->
+    <div id="modalLectura" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#1A1A18] rounded-2xl max-w-3xl w-full p-6 md:p-10 shadow-2xl border border-[#2C2B27] max-h-[90vh] overflow-y-auto space-y-6 text-[#E5E2DC]">
+            <div class="flex justify-between items-start border-b border-[#2C2B27] pb-4">
                 <div>
-                    <span id="modalCatBadge" class="text-xs font-bold text-[#B48A3E] bg-amber-50 px-3 py-1 rounded-full uppercase tracking-wider border border-amber-200"></span>
-                    <h2 id="modalTitulo" class="text-xl md:text-2xl font-bold text-[#1B365D] font-serif mt-2"></h2>
-                    <p id="modalSubInfo" class="text-xs text-slate-500 mt-1"></p>
+                    <span id="modalCatBadge" class="text-[10px] font-bold text-[#C29B38] uppercase tracking-widest bg-[#2C2B27] px-2.5 py-1 rounded"></span>
+                    <h2 id="modalTitulo" class="text-xl md:text-3xl font-bold font-serif text-[#F4F1EA] mt-2"></h2>
+                    <p id="modalSubInfo" class="text-xs text-[#A8A49C] mt-2"></p>
                 </div>
-                <button onclick="cerrarModalLectura()" class="text-slate-400 hover:text-slate-600 cursor-pointer p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="cerrarModalLectura()" class="text-[#A8A49C] hover:text-white p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
-            <div id="modalImagenContainer" class="hidden rounded-xl overflow-hidden max-h-60">
-                <img id="modalImagen" src="" alt="Imagen ilustrativa" class="w-full h-full object-cover">
+            <div id="modalImagenContainer" class="hidden rounded-xl overflow-hidden max-h-72 border border-[#2C2B27]">
+                <img id="modalImagen" src="" alt="Imagen" class="w-full h-full object-cover">
             </div>
 
             <div class="space-y-4">
-                <div id="modalSumario" class="text-sm font-semibold text-slate-700 italic border-l-4 border-[#B48A3E] pl-4 font-serif"></div>
-                <div id="modalContenido" class="text-sm text-slate-800 leading-relaxed font-serif letra-capitular whitespace-pre-line"></div>
+                <div id="modalSumario" class="text-sm font-semibold text-[#D4D0C7] italic border-l-2 border-[#C29B38] pl-4 font-serif"></div>
+                <div id="modalContenido" class="text-sm leading-relaxed font-serif letra-capitular whitespace-pre-line text-[#E5E2DC]"></div>
             </div>
 
-            <div class="border-t pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <button onclick="copiarCitaBibliografica()" class="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-[#1B365D] border border-amber-200 rounded-lg text-xs font-medium transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-quote-left text-[#B48A3E]"></i> Copiar Cita Bibliográfica (APA)
+            <div class="border-t border-[#2C2B27] pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <button onclick="copiarCitaBibliografica()" class="px-4 py-2 bg-[#2C2B27] hover:bg-[#383733] text-amber-200 rounded-lg text-xs font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-quote-left text-[#C29B38]"></i> Copiar Cita Bibliográfica (APA)
                 </button>
-                <button onclick="cerrarModalLectura()" class="px-5 py-2 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-lg text-xs font-medium transition cursor-pointer">Cerrar Lectura</button>
+                <button onclick="cerrarModalLectura()" class="px-5 py-2 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-xs">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT DE LÓGICA CON FIREBASE FIRESTORE -->
+    <!-- SCRIPT DE CONEXIÓN A FIREBASE Y LÓGICA EDITORIAL -->
     <script>
-        // Configuración de Firebase conectada a tu proyecto anh-portal-noticias
         const firebaseConfig = {
             apiKey: "AIzaSyDoOZHIgxTbL_Qs-d2rwWFMJeooCKsKQY4",
             authDomain: "anh-portal-noticias.firebaseapp.com",
@@ -542,36 +302,18 @@
 
         firebase.initializeApp(firebaseConfig);
         const dbFirestore = firebase.firestore();
-        const docRef = dbFirestore.collection("portal").doc("datos_anh");
+        const docRef = dbFirestore.collection("portal").doc("datos_anh_revista");
 
-        let lineChartInstance = null;
         let paginaActual = 1;
         const porPagina = 6;
         let noticiaSeleccionadaParaCita = null;
         let dbMemoria = null;
         let sesionAdminActiva = false;
+        let seccionFiltroActiva = "todos";
 
         function obtenerEstructuraPorDefecto() {
             return {
-                admin: {
-                    usuario: "admin",
-                    clave: "anh2026*",
-                    correo: "secretaria@anhvenezuela.org",
-                    nombre: "Junta Directiva ANH"
-                },
-                logoUrl: "",
-                textos: {
-                    acercaBadge: "Institución Bicentenaria",
-                    acercaTitulo: "Salvaguarda de la Memoria Histórica Nacional",
-                    acercaTexto: "Fundada para promover la investigación rigurosa, el resguardo documental y la divulgación del devenir histórico venezolano y americano con estricto rigor crítico y académico.",
-                    acercaVisible: true,
-                    bannerTitulo: "Crónica y Actualidad Historiográfica",
-                    bannerSub: "Accede a las últimas investigaciones, incorporaciones de nuevos Individuos de Número y convocatorias oficiales.",
-                    labelGranTotal: "Publicaciones Activas",
-                    labelKilos: "Artículos y Ensayos Publicados",
-                    labelCarbono: "Condecoraciones y Premios"
-                },
-                orden: { acerca: 1, tarjetas: 2, grafico: 3, materiales: 4, informes: 5 },
+                admin: { usuario: "admin", clave: "anh2026*", correo: "secretaria@anhvenezuela.org", nombre: "Junta Directiva ANH" },
                 jornadas: [
                     {
                         id: "anh_1",
@@ -580,8 +322,8 @@
                         autor: "Dr. Tomás Straka",
                         titulo: "Incorporación del nuevo Individuo de Número Sillón N° 12",
                         sumario: "La Academia Nacional de la Historia celebró la solemne incorporación del ilustre historiador con su discurso sobre la historiografía republicana.",
-                        contenido: "En solemne sesión celebrada en el Salón de Sesiones de la Academia Nacional de la Historia, se procedió a la recepción oficial del nuevo Individuo de Número, quien ocupará el Sillón N° 12. Durante su discurso de orden, titulado 'Las fuentes primarias y la construcción de la conciencia nacional', destacó la importancia ineludible de preservar el patrimonio documental de la nación frente a los retos del siglo XXI.\n\nLa respuesta al discurso estuvo a cargo del Director de la corporación, quien resaltó los méritos académicos y las investigaciones pioneras del recipiendario en el estudio de las independencias hispanoamericanas.",
-                        imagen: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80",
+                        contenido: "En solemne sesión celebrada en el Salón de Sesiones de la Academia Nacional de la Historia, se procedió a la recepción oficial del nuevo Individuo de Número, quien ocupará el Sillón N° 12. Durante su discurso de orden, titulado 'Las fuentes primarias y la construcción de la conciencia nacional', destacó la importancia ineludible de preservar el patrimonio documental de la nación frente a los retos del siglo XXI.",
+                        imagen: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80",
                         destacada: true
                     },
                     {
@@ -591,7 +333,7 @@
                         autor: "Comité Editorial",
                         titulo: "Publicación del nuevo número del Boletín de la Academia Nacional de la Historia",
                         sumario: "Ya se encuentra disponible la edición trimestral que recopila ensayos inéditos sobre historia colonial y contemporánea.",
-                        contenido: "El Comité Editorial se complace en anunciar la puesta en circulación del número más reciente del histórico Boletín de la Academia Nacional de la Historia, fundado en 1912. Esta edición incluye monografías especializadas sobre las rutas comerciales del cacao en la Provincia de Venezuela, así como un valioso epistolario inédito del Libertador Simón Bolívar resguardado en nuestros archivos.",
+                        contenido: "El Comité Editorial se complace en anunciar la puesta en circulación del número más reciente del histórico Boletín de la Academia Nacional de la Historia, fundado en 1912. Esta edición incluye monografías especializadas sobre las rutas comerciales del cacao en la Provincia de Venezuela.",
                         imagen: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
                         destacada: false
                     },
@@ -602,7 +344,7 @@
                         autor: "Secretaría Académica",
                         titulo: "Apertura del Concurso para el Premio Nacional de Historia Francisco González Guinán",
                         sumario: "Se convoca a historiadores e investigadores a postular sus obras inéditas para la edición 2026 del galardón.",
-                        contenido: "La Academia Nacional de la Historia abre oficialmente el proceso de postulación para el Premio Nacional de Historia Francisco González Guinán en su edición 2026. Podrán participar autores nacionales y extranjeros con obras de rigurosa investigación histórica sobre Venezuela y el área del Caribe. El veredicto del jurado calificador se dará a conocer en sesión solemne el próximo mes de diciembre.",
+                        contenido: "La Academia Nacional de la Historia abre oficialmente el proceso de postulación para el Premio Nacional de Historia Francisco González Guinán en su edición 2026. Podrán participar autores nacionales y extranjeros.",
                         imagen: "https://images.unsplash.com/photo-1507842217343-583bb7270b67?auto=format&fit=crop&w=800&q=80",
                         destacada: false
                     }
@@ -617,243 +359,55 @@
         function guardarDB(nuevaDb) {
             dbMemoria = nuevaDb;
             const status = document.getElementById("cloudStatus");
-            if (status) status.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Guardando en Nube...`;
+            if (status) status.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Sincronizando...`;
 
             docRef.set(nuevaDb).then(() => {
-                if (status) status.innerHTML = `<i class="fa-solid fa-cloud"></i> Sincronizado en vivo`;
-                renderizarTodo();
+                if (status) status.innerHTML = `<i class="fa-solid fa-cloud"></i> Conectado a Firebase`;
+                renderizarTodoPortal();
             }).catch((error) => {
-                console.error("Error guardando en Firestore:", error);
-                alert("Hubo un error al sincronizar con Firebase: " + error.message);
+                console.error("Error Firebase:", error);
             });
         }
 
-        // Escuchar cambios en tiempo real desde la nube
         window.addEventListener("DOMContentLoaded", () => {
             docRef.onSnapshot((doc) => {
-                const status = document.getElementById("cloudStatus");
                 if (doc.exists) {
                     dbMemoria = doc.data();
-                    if (status) status.innerHTML = `<i class="fa-solid fa-cloud"></i> Sincronizado en vivo`;
-                    renderizarTodo();
+                    renderizarTodoPortal();
                 } else {
-                    // Primera vez que se abre: crea la base de datos en Firebase con los datos iniciales
                     guardarDB(obtenerEstructuraPorDefecto());
                 }
-            }, (error) => {
-                console.error("Error de lectura en Firebase:", error);
-                const status = document.getElementById("cloudStatus");
-                if (status) status.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Sin conexión nube`;
-                renderizarTodo();
             });
         });
 
-        function renderizarTodo() {
+        function renderizarTodoPortal() {
             const db = obtenerDB();
-            
-            const logoContainer = document.getElementById("headerLogoContainer");
-            const adminPreview = document.getElementById("adminLogoPreview");
-            if (db.logoUrl) {
-                logoContainer.innerHTML = `<img src="${db.logoUrl}" class="w-full h-full object-cover">`;
-                adminPreview.innerHTML = `<img src="${db.logoUrl}" class="w-full h-full object-cover">`;
-            } else {
-                logoContainer.innerHTML = `<i class="fa-solid fa-landmark-dome"></i>`;
-                adminPreview.innerHTML = `<i class="fa-solid fa-landmark-dome"></i>`;
-            }
-
-            document.getElementById("pubAcercaBadge").innerText = db.textos.acercaBadge;
-            document.getElementById("pubAcercaTitulo").innerText = db.textos.acercaTitulo;
-            document.getElementById("pubAcercaTexto").innerText = db.textos.acercaTexto;
-            document.getElementById("pubBannerTitulo").innerText = db.textos.bannerTitulo;
-            document.getElementById("pubBannerSub").innerText = db.textos.bannerSub;
-            document.getElementById("pubLabelGranTotal").innerText = db.textos.labelGranTotal;
-            document.getElementById("pubLabelKilos").innerText = db.textos.labelKilos;
-            document.getElementById("pubLabelCarbono").innerText = db.textos.labelCarbono;
-
-            const bloqueAcerca = document.getElementById("bloqueAcerca");
-            if (db.textos.acercaVisible) bloqueAcerca.classList.remove("hidden");
-            else bloqueAcerca.classList.add("hidden");
-
-            ordenarBloquesVistaPublica(db.orden);
-
-            document.getElementById("editAcercaBadge").value = db.textos.acercaBadge;
-            document.getElementById("editAcercaTitulo").value = db.textos.acercaTitulo;
-            document.getElementById("editAcercaTexto").value = db.textos.acercaTexto;
-            document.getElementById("editAcercaVisible").checked = db.textos.acercaVisible;
-            document.getElementById("editBannerTitulo").value = db.textos.bannerTitulo;
-            document.getElementById("editBannerSub").value = db.textos.bannerSub;
-            document.getElementById("editLabelGranTotal").value = db.textos.labelGranTotal;
-            document.getElementById("editLabelKilos").value = db.textos.labelKilos;
-            document.getElementById("editLabelCarbono").value = db.textos.labelCarbono;
-
-            document.getElementById("ordenAcerca").value = db.orden.acerca;
-            document.getElementById("ordenTarjetas").value = db.orden.tarjetas;
-            document.getElementById("ordenGrafico").value = db.orden.grafico;
-            document.getElementById("ordenMateriales").value = db.orden.materiales;
-            document.getElementById("ordenInformes").value = db.orden.informes;
-
-            document.getElementById("editAdminUsuario").value = db.admin.usuario;
-            document.getElementById("editAdminCorreo").value = db.admin.correo;
-
-            const totalPublicaciones = db.jornadas.length;
-            document.getElementById("pubGranTotal").innerText = totalPublicaciones;
-            document.getElementById("pubTotalKilos").innerText = totalPublicaciones + " Registradas";
-
-            renderizarPorcentajeMateriales(db.jornadas);
-            renderizarListaInformesPublicos(db.jornadas);
-            actualizarGraficoLineasAnual();
-            poblarSelectsInformes(db.jornadas);
+            renderizarPortada(db.jornadas);
             renderizarTablaAdmin(db.jornadas);
         }
 
-        function ordenarBloquesVistaPublica(orden) {
-            const vistaPublica = document.getElementById("vistaPublica");
-            const mapaBloques = {
-                acerca: document.getElementById("bloqueAcerca"),
-                tarjetas: document.getElementById("bloqueTarjetasResumen"),
-                grafico: document.getElementById("bloqueGrafico"),
-                materiales: document.getElementById("bloqueMaterialesPorcentaje"),
-                informes: document.getElementById("bloqueInformesBuscador")
-            };
-            const ordenArray = Object.keys(orden).sort((a, b) => orden[a] - orden[b]);
-            ordenArray.forEach(key => {
-                if (mapaBloques[key]) vistaPublica.appendChild(mapaBloques[key]);
-            });
+        function filtrarPorSeccionNav(seccion) {
+            seccionFiltroActiva = seccion;
+            paginaActual = 1;
+            renderizarTodoPortal();
         }
 
-        function cambiarVista(vista) {
-            const vPublica = document.getElementById("vistaPublica");
-            const vAdmin = document.getElementById("vistaAdmin");
-            const btnPub = document.getElementById("btnPublico");
-            const btnAdm = document.getElementById("btnAdminNav");
-
-            if (vista === "publico") {
-                vPublica.classList.remove("hidden");
-                vAdmin.classList.add("hidden");
-                btnPub.classList.add("bg-[#284a7a]");
-                btnAdm.classList.remove("bg-[#284a7a]");
-            } else {
-                if (!sesionAdminActiva) {
-                    abrirModalAcceso();
-                    return;
-                }
-                vPublica.classList.add("hidden");
-                vAdmin.classList.remove("hidden");
-                btnAdm.classList.add("bg-[#284a7a]");
-                btnPub.classList.remove("bg-[#284a7a]");
-            }
+        function toggleBuscadorHeader() {
+            const box = document.getElementById("buscadorHeaderBox");
+            box.classList.toggle("hidden");
         }
 
-        function abrirModalAcceso() {
-            document.getElementById("authModal").classList.remove("hidden");
-            document.getElementById("formLogin").classList.remove("hidden");
-            document.getElementById("formRecuperar").classList.add("hidden");
-            document.getElementById("loginUsuario").value = "";
-            document.getElementById("loginClave").value = "";
-        }
-
-        function cerrarModalAcceso() {
-            document.getElementById("authModal").classList.add("hidden");
-        }
-
-        function verificarLogin(e) {
-            e.preventDefault();
-            const usr = document.getElementById("loginUsuario").value.trim();
-            const pwd = document.getElementById("loginClave").value.trim();
-            const db = obtenerDB();
-
-            if (usr === db.admin.usuario && pwd === db.admin.clave) {
-                sesionAdminActiva = true;
-                cerrarModalAcceso();
-                document.getElementById("adminNombreDisplay").innerText = db.admin.nombre;
-                cambiarVista("admin");
-            } else {
-                alert("Usuario o contraseña incorrectos.");
-            }
-        }
-
-        function cerrarAdmin() {
-            sesionAdminActiva = false;
-            cambiarVista("publico");
-        }
-
-        function mostrarRecuperacion() {
-            document.getElementById("formLogin").classList.add("hidden");
-            document.getElementById("formRecuperar").classList.remove("hidden");
-            document.getElementById("nuevaClaveBox").classList.add("hidden");
-            document.getElementById("recCorreo").value = "";
-        }
-
-        function procesarRecuperacion(e) {
-            e.preventDefault();
-            const correoIngresado = document.getElementById("recCorreo").value.trim();
-            const db = obtenerDB();
-            const nuevaClaveBox = document.getElementById("nuevaClaveBox");
-            const btnSub = document.getElementById("btnRecuperarSubmit");
-
-            if (nuevaClaveBox.classList.contains("hidden")) {
-                if (correoIngresado.toLowerCase() === db.admin.correo.toLowerCase()) {
-                    document.getElementById("usuarioRecuperado").innerText = db.admin.usuario;
-                    nuevaClaveBox.classList.remove("hidden");
-                    btnSub.innerText = "Guardar Nueva Contraseña";
-                } else {
-                    alert("El correo ingresado no coincide con el registro de la Academia.");
-                }
-            } else {
-                const nuevaClave = document.getElementById("recNuevaClave").value.trim();
-                if (nuevaClave.length < 6) {
-                    alert("La contraseña debe tener al menos 6 caracteres.");
-                    return;
-                }
-                db.admin.clave = nuevaClave;
-                guardarDB(db);
-                alert("¡Contraseña actualizada en la nube con éxito!");
-                abrirModalAcceso();
-            }
-        }
-
-        function renderizarPorcentajeMateriales(jornadas) {
-            const contenedor = document.getElementById("pubListaMateriales");
-            contenedor.innerHTML = "";
-            const categorias = [
-                "Institucional y Directiva",
-                "Individuos de Número / Conmemoraciones",
-                "Investigaciones y Artículos",
-                "Boletín y Publicaciones",
-                "Eventos, Conferencias y Concursos"
-            ];
-            const conteo = {};
-            categorias.forEach(cat => conteo[cat] = 0);
-            jornadas.forEach(j => {
-                if (conteo[j.lugar] !== undefined) conteo[j.lugar]++;
-                else conteo[j.lugar] = (conteo[j.lugar] || 0) + 1;
-            });
-            const total = jornadas.length || 1;
-            Object.keys(conteo).forEach(cat => {
-                const cant = conteo[cat];
-                const porcentaje = Math.round((cant / total) * 100);
-                const div = document.createElement("div");
-                div.className = "space-y-1";
-                div.innerHTML = `
-                    <div class="flex justify-between text-xs font-semibold text-slate-700">
-                        <span>${cat}</span>
-                        <span>${cant} publicaciones (${porcentaje}%)</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                        <div class="bg-[#1B365D] h-2.5 rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
-                    </div>
-                `;
-                contenedor.appendChild(div);
-            });
-        }
-
-        function renderizarListaInformesPublicos(jornadas) {
-            const contenedor = document.getElementById("pubListaInformes");
+        function renderizarPortada(jornadas) {
+            const portadaContainer = document.getElementById("portadaDestacadaContainer");
+            const listaContainer = document.getElementById("pubListaInformes");
             const pagContenedor = document.getElementById("paginacionContenedor");
+            const contadorPub = document.getElementById("contadorPublicaciones");
+
             const fechaFiltro = document.getElementById("filtroFecha").value;
             const textoFiltro = document.getElementById("filtroTexto").value.toLowerCase();
 
             let filtradas = jornadas.filter(j => {
+                let coincideSeccion = seccionFiltroActiva === "todos" ? true : j.lugar === seccionFiltroActiva;
                 let coincideFecha = fechaFiltro ? j.fecha === fechaFiltro : true;
                 let coincideTexto = textoFiltro ? (
                     j.titulo.toLowerCase().includes(textoFiltro) ||
@@ -861,104 +415,109 @@
                     j.autor.toLowerCase().includes(textoFiltro) ||
                     j.lugar.toLowerCase().includes(textoFiltro)
                 ) : true;
-                return coincideFecha && coincideTexto;
+                return coincideSeccion && coincideFecha && coincideTexto;
             });
 
             filtradas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            contadorPub.innerText = `${filtradas.length} artículos encontrados`;
+
+            // Destacada de portada (la primera marcada como destacada o la más reciente)
+            let destacada = filtradas.find(j => j.destacada) || filtradas[0];
+            if (destacada && seccionFiltroActiva === "todos" && !textoFiltro && !fechaFiltro) {
+                portadaContainer.style.display = "grid";
+                portadaContainer.innerHTML = `
+                    <div class="lg:col-span-7 space-y-4">
+                        <span class="text-xs font-bold text-[#C29B38] uppercase tracking-widest bg-[#2C2B27] px-3 py-1 rounded">${destacada.lugar}</span>
+                        <h2 class="text-2xl md:text-4xl font-extrabold font-serif text-[#F4F1EA] leading-tight hover:text-[#C29B38] cursor-pointer transition" onclick="abrirModalLectura('${destacada.id}')">${destacada.titulo}</h2>
+                        <p class="text-sm text-[#C5C0B5] font-serif leading-relaxed">${destacada.sumario}</p>
+                        <div class="flex items-center gap-3 text-xs text-[#A8A49C] pt-2">
+                            <span><i class="fa-solid fa-pen-nib mr-1 text-[#C29B38]"></i> ${destacada.autor}</span>
+                            <span>&bull;</span>
+                            <span>${destacada.fecha}</span>
+                        </div>
+                        <div>
+                            <button onclick="abrirModalLectura('${destacada.id}')" class="mt-2 px-5 py-2.5 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-xs transition">Leer Artículo Completo</button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 h-72 md:h-96 rounded-2xl overflow-hidden border border-[#2C2B27] cursor-pointer" onclick="abrirModalLectura('${destacada.id}')">
+                        <img src="${destacada.imagen || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1000&q=80'}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                    </div>
+                `;
+                // Excluir la destacada de la grilla inferior si estamos en vista general sin filtros
+                filtradas = filtradas.filter(j => j.id !== destacada.id);
+            } else {
+                portadaContainer.style.display = "none";
+            }
+
+            // Paginación para la grilla
             const totalPaginas = Math.ceil(filtradas.length / porPagina) || 1;
             if (paginaActual > totalPaginas) paginaActual = totalPaginas;
             const inicio = (paginaActual - 1) * porPagina;
             const paginadas = filtradas.slice(inicio, inicio + porPagina);
 
-            contenedor.innerHTML = "";
-            if (paginadas.length === 0) {
-                contenedor.innerHTML = `<div class="col-span-full text-center py-8 text-slate-500 text-sm">No se encontraron publicaciones con los criterios seleccionados.</div>`;
+            listaContainer.innerHTML = "";
+            if (paginadas.length === 0 && portadaContainer.style.display === "none") {
+                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-[#A8A49C] text-sm">No se encontraron publicaciones con estos criterios.</div>`;
                 pagContenedor.innerHTML = "";
                 return;
             }
 
             paginadas.forEach(j => {
-                const tarjeta = document.createElement("div");
-                tarjeta.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between";
-                tarjeta.innerHTML = `
+                const card = document.createElement("div");
+                card.className = "bg-[#1A1A18] rounded-2xl border border-[#2C2B27] overflow-hidden flex flex-col justify-between hover:border-[#C29B38]/50 transition group";
+                card.innerHTML = `
                     <div>
-                        ${j.imagen ? `<div class="h-48 overflow-hidden"><img src="${j.imagen}" alt="Imagen" class="w-full h-full object-cover"></div>` : `<div class="h-24 bg-gradient-to-r from-[#1B365D] to-[#284a7a] flex items-center justify-center text-white p-4 font-serif font-bold text-center">${j.lugar}</div>`}
-                        <div class="p-5 space-y-2">
-                            <div class="flex justify-between items-center text-xs">
-                                <span class="bg-amber-50 text-[#B48A3E] font-bold px-2.5 py-1 rounded-full border border-amber-200">${j.lugar}</span>
-                                <span class="text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>${j.fecha}</span>
+                        <div class="h-48 overflow-hidden cursor-pointer" onclick="abrirModalLectura('${j.id}')">
+                            <img src="${j.imagen || 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="p-5 space-y-3">
+                            <div class="flex justify-between items-center text-[10px]">
+                                <span class="bg-[#2C2B27] text-[#C29B38] font-bold px-2.5 py-1 rounded uppercase tracking-wider">${j.lugar}</span>
+                                <span class="text-[#A8A49C]">${j.fecha}</span>
                             </div>
-                            <h4 class="text-base font-bold text-[#1B365D] font-serif line-clamp-2">${j.titulo}</h4>
-                            <p class="text-xs text-slate-600 line-clamp-2 font-serif">${j.sumario}</p>
-                            <p class="text-[11px] text-slate-400 italic">Por: ${j.autor}</p>
+                            <h4 class="text-base font-bold font-serif text-[#F4F1EA] line-clamp-2 cursor-pointer hover:text-[#C29B38] transition" onclick="abrirModalLectura('${j.id}')">${j.titulo}</h4>
+                            <p class="text-xs text-[#C5C0B5] line-clamp-2 font-serif">${j.sumario}</p>
+                            <p class="text-[11px] text-[#A8A49C] italic">Por: ${j.autor}</p>
                         </div>
                     </div>
-                    <div class="p-5 pt-0 flex items-center justify-between border-t border-slate-100 mt-2">
-                        <button onclick="abrirModalLectura('${j.id}')" class="w-full mt-3 py-2 bg-[#1B365D] hover:bg-[#284a7a] text-white rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-book-open"></i> Leer Artículo Completo
-                        </button>
+                    <div class="p-5 pt-0 border-t border-[#2C2B27] mt-2">
+                        <button onclick="abrirModalLectura('${j.id}')" class="w-full mt-4 py-2 bg-[#2C2B27] hover:bg-[#383733] text-white rounded-xl text-xs font-semibold transition">Leer Artículo</button>
                     </div>
                 `;
-                contenedor.appendChild(tarjeta);
+                listaContainer.appendChild(card);
             });
 
             pagContenedor.innerHTML = "";
             for (let i = 1; i <= totalPaginas; i++) {
                 const btn = document.createElement("button");
-                btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${i === paginaActual ? 'bg-[#1B365D] text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`;
+                btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition ${i === paginaActual ? 'bg-[#C29B38] text-black' : 'bg-[#2C2B27] text-white hover:bg-[#383733]'}`;
                 btn.innerText = i;
-                btn.onclick = () => {
-                    paginaActual = i;
-                    renderizarListaInformesPublicos(obtenerDB().jornadas);
-                };
+                btn.onclick = () => { paginaActual = i; renderizarTodoPortal(); };
                 pagContenedor.appendChild(btn);
             }
         }
 
-        function filtrarInformesPublicos() {
-            paginaActual = 1;
-            renderizarListaInformesPublicos(obtenerDB().jornadas);
-        }
-
-        function limpiarFiltrosBusqueda() {
-            document.getElementById("filtroFecha").value = "";
+        function limpiarFiltros() {
             document.getElementById("filtroTexto").value = "";
-            document.getElementById("selectInformeRapido").value = "";
+            document.getElementById("filtroFecha").value = "";
+            seccionFiltroActiva = "todos";
             paginaActual = 1;
-            renderizarListaInformesPublicos(obtenerDB().jornadas);
+            renderizarTodoPortal();
         }
 
-        function poblarSelectsInformes(jornadas) {
-            const selectRapido = document.getElementById("selectInformeRapido");
-            selectRapido.innerHTML = `<option value="">-- Todas las publicaciones --</option>`;
-            jornadas.forEach(j => {
-                const opt = document.createElement("option");
-                opt.value = j.id;
-                opt.innerText = `${j.fecha} - ${j.titulo}`;
-                selectRapido.appendChild(opt);
-            });
-        }
-
-        function seleccionarInformeDirecto(id) {
-            if (!id) return;
-            abrirModalLectura(id);
-        }
-
-        function toggleAcordeonBuscador() {
-            document.getElementById("contenidoAcordeon").classList.toggle("hidden");
-            document.getElementById("iconoAcordeon").classList.toggle("rotate-180");
-        }
-
+        // LECTURA COMPLETA Y CITAS
         function abrirModalLectura(id) {
             const db = obtenerDB();
             const j = db.jornadas.find(item => item.id === id);
             if (!j) return;
             noticiaSeleccionadaParaCita = j;
+
             document.getElementById("modalCatBadge").innerText = j.lugar;
             document.getElementById("modalTitulo").innerText = j.titulo;
-            document.getElementById("modalSubInfo").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${j.fecha} &nbsp;|&nbsp; <i class="fa-solid fa-pen-nib mr-1"></i> ${j.autor}`;
+            document.getElementById("modalSubInfo").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${j.fecha} &nbsp;|&nbsp; <i class="fa-solid fa-pen-nib mr-1 text-[#C29B38]"></i> ${j.autor}`;
             document.getElementById("modalSumario").innerText = j.sumario;
             document.getElementById("modalContenido").innerText = j.contenido;
+
             const imgContainer = document.getElementById("modalImagenContainer");
             const imgElem = document.getElementById("modalImagen");
             if (j.imagen) {
@@ -978,72 +537,86 @@
             if (!noticiaSeleccionadaParaCita) return;
             const j = noticiaSeleccionadaParaCita;
             const anio = j.fecha.split("-")[0];
-            const citaAPA = `${j.autor}. (${anio}). *${j.titulo}*. Academia Nacional de la Historia. Recuperado del portal oficial.`;
+            const citaAPA = `${j.autor}. (${anio}). *${j.titulo}*. Academia Nacional de la Historia.`;
             navigator.clipboard.writeText(citaAPA).then(() => {
-                alert("¡Cita bibliográfica en formato APA copiada al portapapeles!");
+                alert("¡Cita bibliográfica en formato APA copiada con éxito!");
             });
         }
 
-        function actualizarGraficoLineasAnual() {
-            const db = obtenerDB();
-            const filtroCat = document.getElementById("filtroMaterialGrafico").value;
-            const anosMap = {};
-            db.jornadas.forEach(j => {
-                const anio = j.fecha ? j.fecha.split("-")[0] : "2026";
-                if (filtroCat === "todos" || j.lugar === filtroCat) {
-                    anosMap[anio] = (anosMap[anio] || 0) + 1;
-                }
-            });
-            const anosOrdenados = Object.keys(anosMap).sort();
-            const valores = anosOrdenados.map(a => anosMap[a]);
-            if (anosOrdenados.length === 0) {
-                anosOrdenados.push("2026");
-                valores.push(0);
+        // ADMINISTRACIÓN
+        function cambiarVista(vista) {
+            const vPub = document.getElementById("vistaPublica");
+            const vAdm = document.getElementById("vistaAdmin");
+            if (vista === "publico") {
+                vPub.classList.remove("hidden");
+                vAdm.classList.add("hidden");
+            } else {
+                if (!sesionAdminActiva) { abrirModalAcceso(); return; }
+                vPub.classList.add("hidden");
+                vAdm.classList.remove("hidden");
             }
-            const ctx = document.getElementById("lineChartCanvas").getContext("2d");
-            if (lineChartInstance) lineChartInstance.destroy();
-            lineChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: anosOrdenados,
-                    datasets: [{
-                        label: filtroCat === "todos" ? 'Total Publicaciones' : filtroCat,
-                        data: valores,
-                        borderColor: '#B48A3E',
-                        backgroundColor: 'rgba(180, 138, 62, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'bottom' } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-                }
-            });
+        }
+
+        function abrirModalAcceso() {
+            document.getElementById("authModal").classList.remove("hidden");
+            document.getElementById("formLogin").classList.remove("hidden");
+            document.getElementById("formRecuperar").classList.add("hidden");
+        }
+        function cerrarModalAcceso() { document.getElementById("authModal").classList.add("hidden"); }
+
+        function verificarLogin(e) {
+            e.preventDefault();
+            const usr = document.getElementById("loginUsuario").value.trim();
+            const pwd = document.getElementById("loginClave").value.trim();
+            const db = obtenerDB();
+            if (usr === db.admin.usuario && pwd === db.admin.clave) {
+                sesionAdminActiva = true;
+                cerrarModalAcceso();
+                cambiarVista("admin");
+            } else {
+                alert("Credenciales incorrectas.");
+            }
+        }
+        function cerrarAdmin() { sesionAdminActiva = false; cambiarVista("publico"); }
+
+        function mostrarRecuperacion() {
+            document.getElementById("formLogin").classList.add("hidden");
+            document.getElementById("formRecuperar").classList.remove("hidden");
+        }
+
+        function procesarRecuperacion(e) {
+            e.preventDefault();
+            const db = obtenerDB();
+            const correo = document.getElementById("recCorreo").value.trim();
+            const box = document.getElementById("nuevaClaveBox");
+            if (box.classList.contains("hidden")) {
+                if (correo.toLowerCase() === db.admin.correo.toLowerCase()) {
+                    box.classList.remove("hidden");
+                } else { alert("Correo no registrado."); }
+            } else {
+                const nueva = document.getElementById("recNuevaClave").value.trim();
+                db.admin.clave = nueva;
+                guardarDB(db);
+                alert("¡Contraseña actualizada!");
+                abrirModalAcceso();
+            }
         }
 
         function renderizarTablaAdmin(jornadas) {
             const tbody = document.getElementById("tablaAdminJornadas");
             tbody.innerHTML = "";
-            if (jornadas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">No hay publicaciones registradas.</td></tr>`;
-                return;
-            }
             jornadas.forEach(j => {
                 const tr = document.createElement("tr");
-                tr.className = "hover:bg-slate-50";
+                tr.className = "hover:bg-[#121211]";
                 tr.innerHTML = `
-                    <td class="p-3 whitespace-nowrap text-slate-600">${j.fecha}</td>
-                    <td class="p-3 font-bold text-[#1B365D] font-serif max-w-xs truncate">${j.titulo}</td>
-                    <td class="p-3"><span class="bg-amber-50 text-[#B48A3E] px-2 py-0.5 rounded text-xs border border-amber-200">${j.lugar}</span></td>
-                    <td class="p-3 text-slate-600">${j.autor}</td>
-                    <td class="p-3 text-center">${j.destacada ? '<i class="fa-solid fa-star text-amber-500"></i>' : '-'}</td>
+                    <td class="p-3 text-[#A8A49C]">${j.fecha}</td>
+                    <td class="p-3 font-bold font-serif text-white max-w-xs truncate">${j.titulo}</td>
+                    <td class="p-3"><span class="bg-[#2C2B27] text-[#C29B38] px-2 py-0.5 rounded text-[10px]">${j.lugar}</span></td>
+                    <td class="p-3 text-[#A8A49C]">${j.autor}</td>
+                    <td class="p-3 text-center">${j.destacada ? '<i class="fa-solid fa-star text-[#C29B38]"></i>' : '-'}</td>
                     <td class="p-3 text-right space-x-2">
-                        <button onclick="editarJornada('${j.id}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-[#1B365D] rounded text-xs font-medium cursor-pointer border border-amber-200">Editar</button>
-                        <button onclick="eliminarJornada('${j.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-xs font-medium cursor-pointer border border-rose-200">Eliminar</button>
+                        <button onclick="editarJornada('${j.id}')" class="px-2.5 py-1 bg-[#2C2B27] hover:bg-[#383733] text-white rounded text-xs">Editar</button>
+                        <button onclick="eliminarJornada('${j.id}')" class="px-2.5 py-1 bg-rose-950/50 hover:bg-rose-900 text-rose-300 rounded text-xs">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1054,7 +627,7 @@
             e.preventDefault();
             const db = obtenerDB();
             const idEdit = document.getElementById("jornadaIdEdit").value;
-            const nuevaJornada = {
+            const nueva = {
                 id: idEdit ? idEdit : "anh_" + Date.now(),
                 fecha: document.getElementById("inputFecha").value,
                 lugar: document.getElementById("inputLugar").value,
@@ -1065,20 +638,23 @@
                 imagen: document.getElementById("inputImagenUrl").value.trim(),
                 destacada: document.getElementById("inputDestacadaPortada").checked
             };
+            if (nueva.destacada) {
+                db.jornadas.forEach(item => item.destacada = false);
+            }
             if (idEdit) {
-                const index = db.jornadas.findIndex(item => item.id === idEdit);
-                if (index !== -1) db.jornadas[index] = nuevaJornada;
+                const idx = db.jornadas.findIndex(i => i.id === idEdit);
+                if (idx !== -1) db.jornadas[idx] = nueva;
             } else {
-                db.jornadas.push(nuevaJornada);
+                db.jornadas.push(nueva);
             }
             guardarDB(db);
             limpiarFormularioJornada();
-            alert("¡Publicación guardada y sincronizada en Firebase!");
+            alert("¡Publicación guardada en Firebase!");
         }
 
         function editarJornada(id) {
             const db = obtenerDB();
-            const j = db.jornadas.find(item => item.id === id);
+            const j = db.jornadas.find(i => i.id === id);
             if (!j) return;
             document.getElementById("jornadaIdEdit").value = j.id;
             document.getElementById("inputFecha").value = j.fecha;
@@ -1089,85 +665,24 @@
             document.getElementById("inputContenidoNoticia").value = j.contenido;
             document.getElementById("inputImagenUrl").value = j.imagen || "";
             document.getElementById("inputDestacadaPortada").checked = j.destacada || false;
-            document.getElementById("formTitulo").innerHTML = `<i class="fa-solid fa-pen-to-square text-[#B48A3E] mr-2"></i> Editando Publicación: ${j.titulo}`;
-            document.getElementById("btnGuardarJornada").innerText = "Actualizar Publicación";
-            window.scrollTo({ top: document.getElementById("jornadaForm").offsetTop - 100, behavior: 'smooth' });
+            window.scrollTo({ top: document.getElementById("jornadaForm").offsetTop - 50, behavior: 'smooth' });
         }
 
         function eliminarJornada(id) {
-            if (!confirm("¿Estás seguro de eliminar esta publicación de la nube?")) return;
+            if (!confirm("¿Eliminar este artículo?")) return;
             const db = obtenerDB();
-            db.jornadas = db.jornadas.filter(item => item.id !== id);
+            db.jornadas = db.jornadas.filter(i => i.id !== id);
             guardarDB(db);
         }
 
         function limpiarFormularioJornada() {
             document.getElementById("jornadaForm").reset();
             document.getElementById("jornadaIdEdit").value = "";
-            document.getElementById("formTitulo").innerHTML = `<i class="fa-solid fa-circle-plus text-[#B48A3E] mr-2"></i> Redactar Nueva Noticia o Artículo`;
-            document.getElementById("btnGuardarJornada").innerText = "Publicar Noticia";
             document.getElementById("inputFecha").value = new Date().toISOString().split('T')[0];
         }
 
-        function guardarTextosPublicos(e) {
-            e.preventDefault();
-            const db = obtenerDB();
-            db.textos.acercaBadge = document.getElementById("editAcercaBadge").value;
-            db.textos.acercaTitulo = document.getElementById("editAcercaTitulo").value;
-            db.textos.acercaTexto = document.getElementById("editAcercaTexto").value;
-            db.textos.acercaVisible = document.getElementById("editAcercaVisible").checked;
-            db.textos.bannerTitulo = document.getElementById("editBannerTitulo").value;
-            db.textos.bannerSub = document.getElementById("editBannerSub").value;
-            db.textos.labelGranTotal = document.getElementById("editLabelGranTotal").value;
-            db.textos.labelKilos = document.getElementById("editLabelKilos").value;
-            db.textos.labelCarbono = document.getElementById("editLabelCarbono").value;
-            db.orden.acerca = parseInt(document.getElementById("ordenAcerca").value) || 1;
-            db.orden.tarjetas = parseInt(document.getElementById("ordenTarjetas").value) || 2;
-            db.orden.grafico = parseInt(document.getElementById("ordenGrafico").value) || 3;
-            db.orden.materiales = parseInt(document.getElementById("ordenMateriales").value) || 4;
-            db.orden.informes = parseInt(document.getElementById("ordenInformes").value) || 5;
-            guardarDB(db);
-            alert("¡Textos y orden guardados en Firebase!");
-        }
-
-        function subirLogoArchivo(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const db = obtenerDB();
-                db.logoUrl = event.target.result;
-                guardarDB(db);
-                alert("Sello institucional actualizado en la nube.");
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function restaurarLogoDefecto() {
-            const db = obtenerDB();
-            db.logoUrl = "";
-            guardarDB(db);
-        }
-
-        function actualizarCredenciales(e) {
-            e.preventDefault();
-            const db = obtenerDB();
-            db.admin.usuario = document.getElementById("editAdminUsuario").value.trim();
-            db.admin.correo = document.getElementById("editAdminCorreo").value.trim();
-            const nuevaPwd = document.getElementById("editAdminClave").value.trim();
-            if (nuevaPwd) {
-                if (nuevaPwd.length < 6) {
-                    alert("La clave debe tener al menos 6 caracteres.");
-                    return;
-                }
-                db.admin.clave = nuevaPwd;
-            }
-            guardarDB(db);
-            alert("¡Credenciales actualizadas en Firebase!");
-        }
-
         function cargarDatosBaseAdmin() {
-            if (!confirm("¿Restaurar las noticias históricas iniciales en Firebase?")) return;
+            if (!confirm("¿Restaurar artículos históricos base?")) return;
             guardarDB(obtenerEstructuraPorDefecto());
         }
     </script>
