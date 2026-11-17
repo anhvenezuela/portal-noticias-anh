@@ -10,15 +10,13 @@
     <!-- Tailwind CSS y FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Playfair Display e Inter -->
+    <!-- Google Fonts: Inter y Playfair Display -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Firebase App y Firestore SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #121211; color: #E5E2DC; }
+        body { font-family: 'Inter', sans-serif; background-color: #F9F8F6; color: #1D1D1B; }
         .font-serif { font-family: 'Playfair Display', serif; }
         .letra-capitular::first-letter {
             font-family: 'Playfair Display', serif;
@@ -28,116 +26,123 @@
             padding-right: 0.75rem;
             padding-top: 0.2rem;
             font-weight: bold;
-            color: #C29B38;
+            color: #0B4F8A;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-[#C29B38] selection:text-black">
+<body class="min-h-screen flex flex-col">
 
     <!-- BARRA SUPERIOR INSTITUCIONAL -->
-    <div class="bg-[#1A1A18] text-xs text-[#A8A49C] px-4 py-2 border-b border-[#2C2B27]">
+    <div class="bg-[#0B4F8A] text-white text-xs px-4 py-2">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <span class="font-serif italic">Academia Nacional de la Historia</span>
-                <span class="text-[#C29B38]" id="cloudStatus"><i class="fa-solid fa-cloud"></i> Conectado a Firebase</span>
+                <span class="font-serif">República Bolivariana de Venezuela | Academia Nacional de la Historia</span>
+                <span id="cloudStatus" class="bg-blue-900 text-blue-200 px-2 py-0.5 rounded-full text-[10px]"><i class="fa-solid fa-cloud"></i> Firebase Conectado</span>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="cambiarVista('publico')" class="hover:text-white transition"><i class="fa-solid fa-house mr-1"></i> Portada</button>
-                <button onclick="abrirModalAcceso()" class="hover:text-[#C29B38] transition"><i class="fa-solid fa-lock mr-1"></i> Mesa de Redacción</button>
+                <button onclick="cambiarVista('publico')" class="hover:underline"><i class="fa-solid fa-house mr-1"></i> Inicio</button>
+                <button onclick="abrirModalAcceso()" class="hover:underline font-semibold text-amber-200"><i class="fa-solid fa-lock mr-1"></i> Mesa de Redacción</button>
             </div>
         </div>
     </div>
 
-    <!-- CABECERA PRINCIPAL TIPO REVISTA -->
-    <header class="bg-[#121211] border-b border-[#2C2B27] py-6 px-4 text-center">
-        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center space-y-3">
-            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight font-serif text-[#F4F1EA]">
-                gaceta <span class="text-xs uppercase font-sans tracking-widest text-[#C29B38] block md:inline mt-1 md:mt-0 font-semibold">Histórica</span>
-            </h1>
-            <p class="text-xs text-[#A8A49C] font-serif italic tracking-wide">Una mirada crítica y documental desde la Academia. Desde todos partes.</p>
+    <!-- CABECERA INSTITUCIONAL -->
+    <header class="bg-white border-b border-slate-200 shadow-sm py-6 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-blue-50 border border-blue-200 rounded-full flex items-center justify-center text-[#0B4F8A] text-2xl shadow-inner">
+                    <i class="fa-solid fa-landmark"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold font-serif text-[#0B4F8A]">Academia Nacional de la Historia</h1>
+                    <p class="text-xs text-slate-500 font-medium tracking-wide">PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES</p>
+                </div>
+            </div>
+            <!-- Menú de Secciones Dinámico Sincronizado -->
+            <nav id="menuCategoriasPublicas" class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-wider font-semibold text-slate-700">
+                <!-- Se inyecta dinámicamente -->
+            </nav>
         </div>
-        <!-- Menú de Secciones -->
-        <nav class="max-w-4xl mx-auto mt-6 flex flex-wrap justify-center items-center gap-6 text-xs uppercase tracking-widest font-semibold text-[#C5C0B5] border-t border-b border-[#2C2B27] py-3">
-            <a href="#" onclick="filtrarPorSeccionNav('todos'); return false;" class="hover:text-[#C29B38] transition">Portada</a>
-            <a href="#" onclick="filtrarPorSeccionNav('Institucional y Directiva'); return false;" class="hover:text-[#C29B38] transition">Institucional</a>
-            <a href="#" onclick="filtrarPorSeccionNav('Individuos de Número / Conmemoraciones'); return false;" class="hover:text-[#C29B38] transition">Individuos</a>
-            <a href="#" onclick="filtrarPorSeccionNav('Investigaciones y Artículos'); return false;" class="hover:text-[#C29B38] transition">Investigaciones</a>
-            <a href="#" onclick="filtrarPorSeccionNav('Boletín y Publicaciones'); return false;" class="hover:text-[#C29B38] transition">Boletín</a>
-            <a href="#" onclick="filtrarPorSeccionNav('Eventos, Conferencias y Concursos'); return false;" class="hover:text-[#C29B38] transition">Conferencias</a>
-            <button onclick="toggleBuscadorHeader()" class="text-[#C29B38] hover:text-white transition"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
-        </nav>
         <!-- Buscador Desplegable -->
-        <div id="buscadorHeaderBox" class="hidden max-w-xl mx-auto mt-4 p-3 bg-[#1A1A18] rounded-xl border border-[#2C2B27] flex gap-2">
-            <input type="text" id="filtroTexto" oninput="renderizarTodoPortal()" placeholder="Buscar por título, autor o tema..." class="w-full bg-[#121211] border border-[#2C2B27] px-3 py-1.5 rounded-lg text-xs text-white focus:outline-none focus:border-[#C29B38]">
-            <input type="date" id="filtroFecha" oninput="renderizarTodoPortal()" class="bg-[#121211] border border-[#2C2B27] px-3 py-1.5 rounded-lg text-xs text-white focus:outline-none">
-            <button onclick="limpiarFiltros()" class="px-3 py-1.5 bg-[#2C2B27] hover:bg-[#383733] text-white rounded-lg text-xs">Limpiar</button>
+        <div id="buscadorHeaderBox" class="hidden max-w-3xl mx-auto mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 flex gap-2">
+            <input type="text" id="filtroTexto" oninput="renderizarTodoPortal()" placeholder="Buscar por título, autor o tema..." class="w-full bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-[#0B4F8A]">
+            <input type="date" id="filtroFecha" oninput="renderizarTodoPortal()" class="bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs text-slate-800 focus:outline-none">
+            <button onclick="limpiarFiltros()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-medium">Limpiar</button>
         </div>
     </header>
+
+    <!-- FRANJA DE TÍTULO DE SECCIÓN -->
+    <div class="bg-[#0B4F8A] text-white py-8 px-4 shadow-inner">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold font-serif">Actualidad y Comunicados</h2>
+            <p class="text-xs text-blue-200 mt-1 font-serif">Difusión oficial de las actividades, ingresos de Individuos de Número y boletines académicos.</p>
+        </div>
+    </div>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-12">
 
-        <!-- MODAL DE ACCESO DE ADMINISTRADOR -->
-        <div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-[#1A1A18] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#2C2B27] text-[#E5E2DC]">
-                <div class="flex justify-between items-center mb-4 border-b border-[#2C2B27] pb-3">
-                    <h3 class="text-lg font-bold font-serif text-[#F4F1EA]">
-                        <i class="fa-solid fa-shield-halved text-[#C29B38] mr-2"></i> Mesa de Redacción
+        <!-- MODAL DE ACCESO ADMINISTRATIVO -->
+        <div id="authModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 class="text-lg font-bold font-serif text-[#0B4F8A]">
+                        <i class="fa-solid fa-shield-halved text-amber-600 mr-2"></i> Mesa de Redacción
                     </h3>
-                    <button onclick="cerrarModalAcceso()" class="text-[#A8A49C] hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    <button onclick="cerrarModalAcceso()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
 
                 <form id="formLogin" onsubmit="verificarLogin(event)" class="space-y-4">
-                    <p class="text-xs text-[#A8A49C]">Acceso exclusivo para editores y miembros de la Junta Directiva.</p>
+                    <p class="text-xs text-slate-500">Acceso exclusivo para editores autorizados de la Academia.</p>
                     <div>
-                        <label class="block text-xs font-semibold text-[#C5C0B5] mb-1">Usuario:</label>
-                        <input type="text" id="loginUsuario" required class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white focus:ring-2 focus:ring-[#C29B38] focus:outline-none">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Usuario:</label>
+                        <input type="text" id="loginUsuario" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0B4F8A] focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-[#C5C0B5] mb-1">Contraseña:</label>
-                        <input type="password" id="loginClave" required class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white focus:ring-2 focus:ring-[#C29B38] focus:outline-none">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña:</label>
+                        <input type="password" id="loginClave" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0B4F8A] focus:outline-none">
                     </div>
                     <div class="flex justify-between items-center pt-1">
-                        <button type="button" onclick="mostrarRecuperacion()" class="text-xs text-[#C29B38] hover:underline">¿Olvidaste tu clave?</button>
+                        <button type="button" onclick="mostrarRecuperacion()" class="text-xs text-[#0B4F8A] hover:underline font-medium">¿Olvidaste tu clave?</button>
                     </div>
-                    <div class="flex justify-end gap-2 pt-2 border-t border-[#2C2B27]">
-                        <button type="button" onclick="cerrarModalAcceso()" class="px-4 py-2 text-[#A8A49C] hover:bg-[#2C2B27] rounded-lg text-sm">Cancelar</button>
-                        <button type="submit" class="px-5 py-2 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-sm">Entrar</button>
+                    <div class="flex justify-end gap-2 pt-2 border-t">
+                        <button type="button" onclick="cerrarModalAcceso()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm">Cancelar</button>
+                        <button type="submit" class="px-5 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-sm font-medium">Entrar</button>
                     </div>
                 </form>
 
                 <form id="formRecuperar" onsubmit="procesarRecuperacion(event)" class="hidden space-y-4">
-                    <p class="text-xs text-[#A8A49C]">Ingresa tu correo institucional registrado:</p>
+                    <p class="text-xs text-slate-600">Ingresa tu correo institucional registrado:</p>
                     <div>
-                        <input type="email" id="recCorreo" required placeholder="correo@academia.org" class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white">
+                        <input type="email" id="recCorreo" required placeholder="correo@academia.org" class="w-full px-3 py-2 border rounded-lg text-sm">
                     </div>
                     <div id="nuevaClaveBox" class="hidden space-y-3">
-                        <div class="bg-[#2C2B27] text-amber-200 p-2.5 rounded-lg text-xs">Correo verificado. Define tu nueva clave:</div>
-                        <input type="password" id="recNuevaClave" minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2 bg-[#121211] border border-[#2C2B27] rounded-lg text-sm text-white">
+                        <div class="bg-blue-50 text-[#0B4F8A] p-2 rounded text-xs">Correo verificado. Define tu nueva clave:</div>
+                        <input type="password" id="recNuevaClave" minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2 border rounded-lg text-sm">
                     </div>
                     <div class="flex justify-between items-center pt-2">
-                        <button type="button" onclick="abrirModalAcceso()" class="text-xs text-[#A8A49C]">Volver</button>
-                        <button type="submit" id="btnRecuperarSubmit" class="px-4 py-2 bg-[#C29B38] text-black font-semibold rounded-lg text-sm">Verificar</button>
+                        <button type="button" onclick="abrirModalAcceso()" class="text-xs text-slate-500">Volver</button>
+                        <button type="submit" id="btnRecuperarSubmit" class="px-4 py-2 bg-[#0B4F8A] text-white rounded-lg text-sm font-medium">Verificar</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- VISTA PÚBLICA (PORTADA ESTILO REVISTA) -->
+        <!-- VISTA PÚBLICA -->
         <div id="vistaPublica" class="space-y-12">
             
-            <!-- NOTICIA DESTACADA DE PORTADA (GRAN FORMATO) -->
-            <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-[#2C2B27] pb-12">
-                <!-- Se inyecta dinámicamente la destacada -->
+            <!-- NOTICIA DESTACADA DE PORTADA -->
+            <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                <!-- Se inyecta dinámicamente -->
             </div>
 
             <!-- GRILLA DE ARTÍCULOS RECIENTES -->
             <div class="space-y-6">
-                <div class="border-b border-[#2C2B27] pb-3 flex justify-between items-center">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-[#C29B38]">Últimas Publicaciones e Investigaciones</h3>
-                    <span id="contadorPublicaciones" class="text-xs text-[#A8A49C]"></span>
+                <div class="border-b border-slate-300 pb-3 flex justify-between items-center">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-[#0B4F8A]">Archivo de Publicaciones</h3>
+                    <span id="contadorPublicaciones" class="text-xs text-slate-500"></span>
                 </div>
-                <div id="pubListaInformes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                <div id="pubListaInformes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 <!-- Paginación -->
                 <div id="paginacionContenedor" class="flex justify-center gap-2 pt-6"></div>
             </div>
@@ -145,98 +150,109 @@
         </div>
 
         <!-- VISTA DE ADMINISTRACIÓN (MESA DE REDACCIÓN) -->
-        <div id="vistaAdmin" class="hidden space-y-8 bg-[#1A1A18] p-6 md:p-8 rounded-2xl border border-[#2C2B27]">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#2C2B27] pb-4">
+        <div id="vistaAdmin" class="hidden space-y-8 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
                 <div>
-                    <h2 class="text-xl font-bold font-serif text-[#F4F1EA]"><i class="fa-solid fa-feather-pointed text-[#C29B38] mr-2"></i> Mesa de Redacción y Edición</h2>
-                    <p class="text-xs text-[#A8A49C]">Editor autorizado: <strong id="adminNombreDisplay" class="text-white">Junta Directiva</strong></p>
+                    <h2 class="text-xl font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-feather-pointed text-amber-600 mr-2"></i> Mesa de Redacción y Edición</h2>
+                    <p class="text-xs text-slate-500">Editor autorizado: <strong id="adminNombreDisplay" class="text-[#0B4F8A]">Junta Directiva</strong></p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="cargarDatosBaseAdmin()" class="px-3 py-2 bg-[#2C2B27] hover:bg-[#383733] text-amber-200 rounded-lg text-xs transition border border-amber-500/20">
-                        <i class="fa-solid fa-database mr-1"></i> Restaurar Noticias Base
+                    <button onclick="cargarDatosBaseAdmin()" class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-[#0B4F8A] rounded-lg text-xs transition border border-blue-200">
+                        <i class="fa-solid fa-database mr-1"></i> Restaurar Base
                     </button>
-                    <button onclick="cerrarAdmin()" class="px-4 py-2 bg-[#121211] hover:bg-[#2C2B27] text-white rounded-lg text-xs transition">
+                    <button onclick="cerrarAdmin()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs transition">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> Salir
                     </button>
                 </div>
             </div>
 
-            <!-- FORMULARIO DE CREACIÓN / EDICIÓN -->
-            <form id="jornadaForm" onsubmit="guardarJornada(event)" class="space-y-6 bg-[#121211] p-6 rounded-xl border border-[#2C2B27]">
+            <!-- GESTIÓN DE ETIQUETAS Y CATEGORÍAS DEL MENÚ -->
+            <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
+                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-tags text-amber-600 mr-2"></i> Gestión de Categorías y Etiquetas del Menú</h3>
+                <p class="text-xs text-slate-600">Agrega, modifica o elimina las etiquetas que aparecerán automáticamente en los botones del menú superior de la página y en los artículos:</p>
+                
+                <div class="flex flex-wrap gap-2 items-center" id="listaEtiquetasAdmin">
+                    <!-- Se inyectan las etiquetas actuales con botón para eliminar -->
+                </div>
+
+                <div class="flex gap-2 pt-2 max-w-md">
+                    <input type="text" id="nuevaEtiquetaInput" placeholder="Nueva categoría o etiqueta..." class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                    <button type="button" onclick="agregarEtiquetaNueva()" class="px-4 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-semibold whitespace-nowrap">Agregar al Menú</button>
+                </div>
+            </div>
+
+            <!-- FORMULARIO DE CREACIÓN / EDICIÓN DE ARTÍCULO -->
+            <form id="jornadaForm" onsubmit="guardarJornada(event)" class="space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
                 <input type="hidden" id="jornadaIdEdit" value="">
                 
-                <h3 id="formTitulo" class="text-base font-bold font-serif text-[#C29B38]">Redactar Nuevo Artículo o Noticia</h3>
+                <h3 id="formTitulo" class="text-base font-bold font-serif text-[#0B4F8A]">Redactar Nuevo Artículo o Noticia</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Fecha:</label>
-                        <input type="date" id="inputFecha" required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Fecha:</label>
+                        <input type="date" id="inputFecha" required class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Sección Académica:</label>
-                        <select id="inputLugar" required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
-                            <option value="Institucional y Directiva">Institucional y Directiva</option>
-                            <option value="Individuos de Número / Conmemoraciones">Individuos de Número / Conmemoraciones</option>
-                            <option value="Investigaciones y Artículos">Investigaciones y Artículos</option>
-                            <option value="Boletín y Publicaciones">Boletín y Publicaciones</option>
-                            <option value="Eventos, Conferencias y Concursos">Eventos, Conferencias y Concursos</option>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Categoría / Etiqueta:</label>
+                        <select id="inputLugar" required class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
+                            <!-- Se poblará dinámicamente con las etiquetas creadas -->
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Autor / Investigador:</label>
-                        <input type="text" id="inputAutor" placeholder="ej. Dr. Tomás Straka" required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Autor / Investigador:</label>
+                        <input type="text" id="inputAutor" placeholder="ej. Dr. Tomás Straka" required class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
                     </div>
                 </div>
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Título del Artículo:</label>
-                        <input type="text" id="inputTituloNoticia" placeholder="Título principal..." required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Título del Artículo:</label>
+                        <input type="text" id="inputTituloNoticia" placeholder="Título principal..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Sumario o Entradilla:</label>
-                        <textarea id="inputSumarioNoticia" rows="2" placeholder="Breve resumen para la portada..." required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white"></textarea>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Sumario o Entradilla:</label>
+                        <textarea id="inputSumarioNoticia" rows="2" placeholder="Breve resumen para la portada..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-[#C5C0B5] mb-1">Cuerpo Completo:</label>
-                        <textarea id="inputContenidoNoticia" rows="6" placeholder="Contenido íntegro del artículo..." required class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white font-serif"></textarea>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Cuerpo Completo:</label>
+                        <textarea id="inputContenidoNoticia" rows="6" placeholder="Contenido íntegro del artículo..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm font-serif"></textarea>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-[#C5C0B5] mb-1">URL de Imagen Ilustrativa:</label>
-                            <input type="url" id="inputImagenUrl" placeholder="https://..." class="w-full px-3 py-2 bg-[#1A1A18] border border-[#2C2B27] rounded-lg text-sm text-white">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">URL de Imagen Ilustrativa:</label>
+                            <input type="url" id="inputImagenUrl" placeholder="https://..." class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
                         </div>
                         <div class="flex items-center pt-6">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="inputDestacadaPortada" class="w-4 h-4 accent-[#C29B38]">
-                                <span class="text-xs font-bold text-[#F4F1EA]">Marcar como Noticia Principal de Portada</span>
+                                <input type="checkbox" id="inputDestacadaPortada" class="w-4 h-4 text-[#0B4F8A] rounded">
+                                <span class="text-xs font-bold text-slate-800">Marcar como Noticia Principal de Portada</span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-[#2C2B27]">
-                    <button type="button" onclick="limpiarFormularioJornada()" class="px-4 py-2 bg-[#2C2B27] hover:bg-[#383733] text-white rounded-lg text-xs">Cancelar</button>
-                    <button type="submit" id="btnGuardarJornada" class="px-6 py-2 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-xs">Publicar Artículo</button>
+                <div class="flex justify-end gap-3 pt-4 border-t">
+                    <button type="button" onclick="limpiarFormularioJornada()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs">Cancelar</button>
+                    <button type="submit" id="btnGuardarJornada" class="px-6 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white font-medium rounded-lg text-xs">Publicar Artículo</button>
                 </div>
             </form>
 
             <!-- TABLA DE GESTIÓN -->
             <div class="space-y-4">
-                <h3 class="text-base font-bold font-serif text-[#F4F1EA]">Archivo de Publicaciones</h3>
+                <h3 class="text-base font-bold font-serif text-[#0B4F8A]">Archivo de Publicaciones</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-[#121211] text-[#A8A49C] uppercase border-b border-[#2C2B27]">
+                            <tr class="bg-slate-100 text-slate-700 uppercase border-b">
                                 <th class="p-3">Fecha</th>
                                 <th class="p-3">Título</th>
-                                <th class="p-3">Sección</th>
+                                <th class="p-3">Categoría / Etiqueta</th>
                                 <th class="p-3">Autor</th>
                                 <th class="p-3 text-center">Portada</th>
                                 <th class="p-3 text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tablaAdminJornadas" class="divide-y divide-[#2C2B27]"></tbody>
+                        <tbody id="tablaAdminJornadas" class="divide-y divide-slate-200"></tbody>
                     </table>
                 </div>
             </div>
@@ -244,51 +260,51 @@
 
     </main>
 
-    <!-- FOOTER TIPO REVISTA -->
-    <footer class="bg-[#0E0E0D] border-t border-[#2C2B27] py-12 px-4 mt-auto">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-[#A8A49C]">
+    <!-- FOOTER -->
+    <footer class="bg-[#0B4F8A] text-white py-8 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs">
             <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-landmark text-[#C29B38] text-lg"></i>
-                <span class="font-serif">Academia Nacional de la Historia — Caracas, Venezuela.</span>
+                <i class="fa-solid fa-landmark text-amber-300 text-lg"></i>
+                <span class="font-serif">Academia Nacional de la Historia — Caracas, Venezuela. Todos los derechos reservados.</span>
             </div>
             <div class="flex space-x-6 font-serif">
-                <a href="https://anhvenezuela.org" target="_blank" class="hover:text-white">Sitio Institucional</a>
-                <a href="#" onclick="abrirModalAcceso(); return false;" class="hover:text-white">Mesa de Redacción</a>
+                <a href="https://anhvenezuela.org" target="_blank" class="hover:underline text-blue-200">Sitio Institucional</a>
+                <a href="#" onclick="abrirModalAcceso(); return false;" class="hover:underline text-blue-200">Mesa de Redacción</a>
             </div>
         </div>
     </footer>
 
     <!-- MODAL DE LECTURA COMPLETA -->
-    <div id="modalLectura" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#1A1A18] rounded-2xl max-w-3xl w-full p-6 md:p-10 shadow-2xl border border-[#2C2B27] max-h-[90vh] overflow-y-auto space-y-6 text-[#E5E2DC]">
-            <div class="flex justify-between items-start border-b border-[#2C2B27] pb-4">
+    <div id="modalLectura" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 md:p-10 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-6">
+            <div class="flex justify-between items-start border-b pb-4">
                 <div>
-                    <span id="modalCatBadge" class="text-[10px] font-bold text-[#C29B38] uppercase tracking-widest bg-[#2C2B27] px-2.5 py-1 rounded"></span>
-                    <h2 id="modalTitulo" class="text-xl md:text-3xl font-bold font-serif text-[#F4F1EA] mt-2"></h2>
-                    <p id="modalSubInfo" class="text-xs text-[#A8A49C] mt-2"></p>
+                    <span id="modalCatBadge" class="text-[10px] font-bold text-[#0B4F8A] uppercase tracking-wider bg-blue-50 border border-blue-200 px-2.5 py-1 rounded"></span>
+                    <h2 id="modalTitulo" class="text-xl md:text-3xl font-bold font-serif text-[#0B4F8A] mt-2"></h2>
+                    <p id="modalSubInfo" class="text-xs text-slate-500 mt-2"></p>
                 </div>
-                <button onclick="cerrarModalLectura()" class="text-[#A8A49C] hover:text-white p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="cerrarModalLectura()" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
-            <div id="modalImagenContainer" class="hidden rounded-xl overflow-hidden max-h-72 border border-[#2C2B27]">
+            <div id="modalImagenContainer" class="hidden rounded-xl overflow-hidden max-h-72 border border-slate-200">
                 <img id="modalImagen" src="" alt="Imagen" class="w-full h-full object-cover">
             </div>
 
             <div class="space-y-4">
-                <div id="modalSumario" class="text-sm font-semibold text-[#D4D0C7] italic border-l-2 border-[#C29B38] pl-4 font-serif"></div>
-                <div id="modalContenido" class="text-sm leading-relaxed font-serif letra-capitular whitespace-pre-line text-[#E5E2DC]"></div>
+                <div id="modalSumario" class="text-sm font-semibold text-slate-700 italic border-l-4 border-[#0B4F8A] pl-4 font-serif"></div>
+                <div id="modalContenido" class="text-sm text-slate-800 leading-relaxed font-serif letra-capitular whitespace-pre-line"></div>
             </div>
 
-            <div class="border-t border-[#2C2B27] pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <button onclick="copiarCitaBibliografica()" class="px-4 py-2 bg-[#2C2B27] hover:bg-[#383733] text-amber-200 rounded-lg text-xs font-medium transition flex items-center gap-2">
-                    <i class="fa-solid fa-quote-left text-[#C29B38]"></i> Copiar Cita Bibliográfica (APA)
+            <div class="border-t pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <button onclick="copiarCitaBibliografica()" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-[#0B4F8A] border border-blue-200 rounded-lg text-xs font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-quote-left text-amber-600"></i> Copiar Cita Bibliográfica (APA)
                 </button>
-                <button onclick="cerrarModalLectura()" class="px-5 py-2 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-xs">Cerrar</button>
+                <button onclick="cerrarModalLectura()" class="px-5 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-medium">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT DE CONEXIÓN A FIREBASE Y LÓGICA EDITORIAL -->
+    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDoOZHIgxTbL_Qs-d2rwWFMJeooCKsKQY4",
@@ -302,7 +318,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const dbFirestore = firebase.firestore();
-        const docRef = dbFirestore.collection("portal").doc("datos_anh_revista");
+        const docRef = dbFirestore.collection("portal").doc("datos_anh_etiquetas_v1");
 
         let paginaActual = 1;
         const porPagina = 6;
@@ -314,6 +330,13 @@
         function obtenerEstructuraPorDefecto() {
             return {
                 admin: { usuario: "admin", clave: "anh2026*", correo: "secretaria@anhvenezuela.org", nombre: "Junta Directiva ANH" },
+                categorias: [
+                    "Institucional y Directiva",
+                    "Individuos de Número / Conmemoraciones",
+                    "Investigaciones y Artículos",
+                    "Boletín y Publicaciones",
+                    "Eventos, Conferencias y Concursos"
+                ],
                 jornadas: [
                     {
                         id: "anh_1",
@@ -362,7 +385,7 @@
             if (status) status.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Sincronizando...`;
 
             docRef.set(nuevaDb).then(() => {
-                if (status) status.innerHTML = `<i class="fa-solid fa-cloud"></i> Conectado a Firebase`;
+                if (status) status.innerHTML = `<i class="fa-solid fa-cloud"></i> Firebase Conectado`;
                 renderizarTodoPortal();
             }).catch((error) => {
                 console.error("Error Firebase:", error);
@@ -382,8 +405,79 @@
 
         function renderizarTodoPortal() {
             const db = obtenerDB();
+            renderizarMenuNavegacion(db.categorias);
+            renderizarSelectCategoriasForm(db.categorias);
+            renderizarEtiquetasAdmin(db.categorias);
             renderizarPortada(db.jornadas);
             renderizarTablaAdmin(db.jornadas);
+        }
+
+        // --- GESTIÓN DINÁMICA DEL MENÚ Y ETIQUETAS ---
+        function renderizarMenuNavegacion(categorias) {
+            const nav = document.getElementById("menuCategoriasPublicas");
+            nav.innerHTML = `
+                <a href="#" onclick="filtrarPorSeccionNav('todos'); return false;" class="hover:text-[#0B4F8A] transition px-2 py-1 ${seccionFiltroActiva === 'todos' ? 'border-b-2 border-[#0B4F8A] font-bold text-[#0B4F8A]' : ''}">Inicio</a>
+            `;
+            categorias.forEach(cat => {
+                const activo = seccionFiltroActiva === cat ? 'border-b-2 border-[#0B4F8A] font-bold text-[#0B4F8A]' : '';
+                const a = document.createElement("a");
+                a.href = "#";
+                a.className = `hover:text-[#0B4F8A] transition px-2 py-1 ${activo}`;
+                a.innerText = cat;
+                a.onclick = (e) => { e.preventDefault(); filtrarPorSeccionNav(cat); };
+                nav.appendChild(a);
+            });
+            nav.innerHTML += `<button onclick="toggleBuscadorHeader()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 ml-2"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>`;
+        }
+
+        function renderizarSelectCategoriasForm(categorias) {
+            const select = document.getElementById("inputLugar");
+            const valorActual = select.value;
+            select.innerHTML = "";
+            categorias.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+            if (valorActual) select.value = valorActual;
+        }
+
+        function renderizarEtiquetasAdmin(categorias) {
+            const contenedor = document.getElementById("listaEtiquetasAdmin");
+            contenedor.innerHTML = "";
+            categorias.forEach(cat => {
+                const span = document.createElement("span");
+                span.className = "inline-flex items-center gap-2 bg-blue-50 text-[#0B4F8A] border border-blue-200 px-3 py-1 rounded-full text-xs font-semibold";
+                span.innerHTML = `
+                    <span>${cat}</span>
+                    <button type="button" onclick="eliminarEtiqueta('${cat}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                contenedor.appendChild(span);
+            });
+        }
+
+        function agregarEtiquetaNueva() {
+            const input = document.getElementById("nuevaEtiquetaInput");
+            const nueva = input.value.trim();
+            if (!nueva) return;
+            const db = obtenerDB();
+            if (db.categorias.includes(nueva)) {
+                alert("Esta categoría ya existe.");
+                return;
+            }
+            db.categorias.push(nueva);
+            guardarDB(db);
+            input.value = "";
+            alert("¡Categoría agregada al menú con éxito!");
+        }
+
+        function eliminarEtiqueta(cat) {
+            if (confirm(`¿Eliminar la categoría "${cat}"? Los artículos asociados mantendrán su texto pero ya no estará en el menú principal.`)) {
+                const db = obtenerDB();
+                db.categorias = db.categorias.filter(c => c !== cat);
+                guardarDB(db);
+            }
         }
 
         function filtrarPorSeccionNav(seccion) {
@@ -393,8 +487,7 @@
         }
 
         function toggleBuscadorHeader() {
-            const box = document.getElementById("buscadorHeaderBox");
-            box.classList.toggle("hidden");
+            document.getElementById("buscadorHeaderBox").classList.toggle("hidden");
         }
 
         function renderizarPortada(jornadas) {
@@ -421,35 +514,32 @@
             filtradas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             contadorPub.innerText = `${filtradas.length} artículos encontrados`;
 
-            // Destacada de portada (la primera marcada como destacada o la más reciente)
             let destacada = filtradas.find(j => j.destacada) || filtradas[0];
             if (destacada && seccionFiltroActiva === "todos" && !textoFiltro && !fechaFiltro) {
                 portadaContainer.style.display = "grid";
                 portadaContainer.innerHTML = `
                     <div class="lg:col-span-7 space-y-4">
-                        <span class="text-xs font-bold text-[#C29B38] uppercase tracking-widest bg-[#2C2B27] px-3 py-1 rounded">${destacada.lugar}</span>
-                        <h2 class="text-2xl md:text-4xl font-extrabold font-serif text-[#F4F1EA] leading-tight hover:text-[#C29B38] cursor-pointer transition" onclick="abrirModalLectura('${destacada.id}')">${destacada.titulo}</h2>
-                        <p class="text-sm text-[#C5C0B5] font-serif leading-relaxed">${destacada.sumario}</p>
-                        <div class="flex items-center gap-3 text-xs text-[#A8A49C] pt-2">
-                            <span><i class="fa-solid fa-pen-nib mr-1 text-[#C29B38]"></i> ${destacada.autor}</span>
+                        <span class="text-xs font-bold text-[#0B4F8A] bg-blue-50 border border-blue-200 px-3 py-1 rounded uppercase tracking-wider">${destacada.lugar}</span>
+                        <h2 class="text-2xl md:text-4xl font-extrabold font-serif text-[#0B4F8A] leading-tight hover:underline cursor-pointer" onclick="abrirModalLectura('${destacada.id}')">${destacada.titulo}</h2>
+                        <p class="text-sm text-slate-600 font-serif leading-relaxed">${destacada.sumario}</p>
+                        <div class="flex items-center gap-3 text-xs text-slate-500 pt-2">
+                            <span><i class="fa-solid fa-pen-nib mr-1 text-[#0B4F8A]"></i> ${destacada.autor}</span>
                             <span>&bull;</span>
                             <span>${destacada.fecha}</span>
                         </div>
                         <div>
-                            <button onclick="abrirModalLectura('${destacada.id}')" class="mt-2 px-5 py-2.5 bg-[#C29B38] hover:bg-[#d49f3e] text-black font-semibold rounded-lg text-xs transition">Leer Artículo Completo</button>
+                            <button onclick="abrirModalLectura('${destacada.id}')" class="mt-2 px-5 py-2.5 bg-[#0B4F8A] hover:bg-blue-800 text-white font-medium rounded-lg text-xs transition">Leer Artículo Completo</button>
                         </div>
                     </div>
-                    <div class="lg:col-span-5 h-72 md:h-96 rounded-2xl overflow-hidden border border-[#2C2B27] cursor-pointer" onclick="abrirModalLectura('${destacada.id}')">
+                    <div class="lg:col-span-5 h-72 md:h-80 rounded-xl overflow-hidden border border-slate-200 cursor-pointer" onclick="abrirModalLectura('${destacada.id}')">
                         <img src="${destacada.imagen || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1000&q=80'}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
                     </div>
                 `;
-                // Excluir la destacada de la grilla inferior si estamos en vista general sin filtros
                 filtradas = filtradas.filter(j => j.id !== destacada.id);
             } else {
                 portadaContainer.style.display = "none";
             }
 
-            // Paginación para la grilla
             const totalPaginas = Math.ceil(filtradas.length / porPagina) || 1;
             if (paginaActual > totalPaginas) paginaActual = totalPaginas;
             const inicio = (paginaActual - 1) * porPagina;
@@ -457,31 +547,31 @@
 
             listaContainer.innerHTML = "";
             if (paginadas.length === 0 && portadaContainer.style.display === "none") {
-                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-[#A8A49C] text-sm">No se encontraron publicaciones con estos criterios.</div>`;
+                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No se encontraron publicaciones con estos criterios.</div>`;
                 pagContenedor.innerHTML = "";
                 return;
             }
 
             paginadas.forEach(j => {
                 const card = document.createElement("div");
-                card.className = "bg-[#1A1A18] rounded-2xl border border-[#2C2B27] overflow-hidden flex flex-col justify-between hover:border-[#C29B38]/50 transition group";
+                card.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition";
                 card.innerHTML = `
                     <div>
                         <div class="h-48 overflow-hidden cursor-pointer" onclick="abrirModalLectura('${j.id}')">
-                            <img src="${j.imagen || 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <img src="${j.imagen || 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80'}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
                         </div>
                         <div class="p-5 space-y-3">
                             <div class="flex justify-between items-center text-[10px]">
-                                <span class="bg-[#2C2B27] text-[#C29B38] font-bold px-2.5 py-1 rounded uppercase tracking-wider">${j.lugar}</span>
-                                <span class="text-[#A8A49C]">${j.fecha}</span>
+                                <span class="bg-blue-50 text-[#0B4F8A] font-bold px-2.5 py-1 rounded border border-blue-200 uppercase tracking-wider">${j.lugar}</span>
+                                <span class="text-slate-400">${j.fecha}</span>
                             </div>
-                            <h4 class="text-base font-bold font-serif text-[#F4F1EA] line-clamp-2 cursor-pointer hover:text-[#C29B38] transition" onclick="abrirModalLectura('${j.id}')">${j.titulo}</h4>
-                            <p class="text-xs text-[#C5C0B5] line-clamp-2 font-serif">${j.sumario}</p>
-                            <p class="text-[11px] text-[#A8A49C] italic">Por: ${j.autor}</p>
+                            <h4 class="text-base font-bold font-serif text-[#0B4F8A] line-clamp-2 cursor-pointer hover:underline" onclick="abrirModalLectura('${j.id}')">${j.titulo}</h4>
+                            <p class="text-xs text-slate-600 line-clamp-2 font-serif">${j.sumario}</p>
+                            <p class="text-[11px] text-slate-400 italic">Por: ${j.autor}</p>
                         </div>
                     </div>
-                    <div class="p-5 pt-0 border-t border-[#2C2B27] mt-2">
-                        <button onclick="abrirModalLectura('${j.id}')" class="w-full mt-4 py-2 bg-[#2C2B27] hover:bg-[#383733] text-white rounded-xl text-xs font-semibold transition">Leer Artículo</button>
+                    <div class="p-5 pt-0 border-t border-slate-100 mt-2">
+                        <button onclick="abrirModalLectura('${j.id}')" class="w-full mt-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">Leer Artículo</button>
                     </div>
                 `;
                 listaContainer.appendChild(card);
@@ -490,7 +580,7 @@
             pagContenedor.innerHTML = "";
             for (let i = 1; i <= totalPaginas; i++) {
                 const btn = document.createElement("button");
-                btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition ${i === paginaActual ? 'bg-[#C29B38] text-black' : 'bg-[#2C2B27] text-white hover:bg-[#383733]'}`;
+                btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition ${i === paginaActual ? 'bg-[#0B4F8A] text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`;
                 btn.innerText = i;
                 btn.onclick = () => { paginaActual = i; renderizarTodoPortal(); };
                 pagContenedor.appendChild(btn);
@@ -505,7 +595,6 @@
             renderizarTodoPortal();
         }
 
-        // LECTURA COMPLETA Y CITAS
         function abrirModalLectura(id) {
             const db = obtenerDB();
             const j = db.jornadas.find(item => item.id === id);
@@ -514,7 +603,7 @@
 
             document.getElementById("modalCatBadge").innerText = j.lugar;
             document.getElementById("modalTitulo").innerText = j.titulo;
-            document.getElementById("modalSubInfo").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${j.fecha} &nbsp;|&nbsp; <i class="fa-solid fa-pen-nib mr-1 text-[#C29B38]"></i> ${j.autor}`;
+            document.getElementById("modalSubInfo").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${j.fecha} &nbsp;|&nbsp; <i class="fa-solid fa-pen-nib mr-1 text-[#0B4F8A]"></i> ${j.autor}`;
             document.getElementById("modalSumario").innerText = j.sumario;
             document.getElementById("modalContenido").innerText = j.contenido;
 
@@ -539,11 +628,10 @@
             const anio = j.fecha.split("-")[0];
             const citaAPA = `${j.autor}. (${anio}). *${j.titulo}*. Academia Nacional de la Historia.`;
             navigator.clipboard.writeText(citaAPA).then(() => {
-                alert("¡Cita bibliográfica en formato APA copiada con éxito!");
+                alert("¡Cita bibliográfica copiada con éxito!");
             });
         }
 
-        // ADMINISTRACIÓN
         function cambiarVista(vista) {
             const vPub = document.getElementById("vistaPublica");
             const vAdm = document.getElementById("vistaAdmin");
@@ -607,16 +695,16 @@
             tbody.innerHTML = "";
             jornadas.forEach(j => {
                 const tr = document.createElement("tr");
-                tr.className = "hover:bg-[#121211]";
+                tr.className = "hover:bg-slate-50";
                 tr.innerHTML = `
-                    <td class="p-3 text-[#A8A49C]">${j.fecha}</td>
-                    <td class="p-3 font-bold font-serif text-white max-w-xs truncate">${j.titulo}</td>
-                    <td class="p-3"><span class="bg-[#2C2B27] text-[#C29B38] px-2 py-0.5 rounded text-[10px]">${j.lugar}</span></td>
-                    <td class="p-3 text-[#A8A49C]">${j.autor}</td>
-                    <td class="p-3 text-center">${j.destacada ? '<i class="fa-solid fa-star text-[#C29B38]"></i>' : '-'}</td>
+                    <td class="p-3 text-slate-600">${j.fecha}</td>
+                    <td class="p-3 font-bold font-serif text-[#0B4F8A] max-w-xs truncate">${j.titulo}</td>
+                    <td class="p-3"><span class="bg-blue-50 text-[#0B4F8A] px-2 py-0.5 rounded text-[10px] border border-blue-200">${j.lugar}</span></td>
+                    <td class="p-3 text-slate-600">${j.autor}</td>
+                    <td class="p-3 text-center">${j.destacada ? '<i class="fa-solid fa-star text-amber-500"></i>' : '-'}</td>
                     <td class="p-3 text-right space-x-2">
-                        <button onclick="editarJornada('${j.id}')" class="px-2.5 py-1 bg-[#2C2B27] hover:bg-[#383733] text-white rounded text-xs">Editar</button>
-                        <button onclick="eliminarJornada('${j.id}')" class="px-2.5 py-1 bg-rose-950/50 hover:bg-rose-900 text-rose-300 rounded text-xs">Eliminar</button>
+                        <button onclick="editarJornada('${j.id}')" class="px-2.5 py-1 bg-blue-50 text-[#0B4F8A] border border-blue-200 rounded text-xs">Editar</button>
+                        <button onclick="eliminarJornada('${j.id}')" class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded text-xs">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -682,7 +770,7 @@
         }
 
         function cargarDatosBaseAdmin() {
-            if (!confirm("¿Restaurar artículos históricos base?")) return;
+            if (!confirm("¿Restaurar base de datos inicial?")) return;
             guardarDB(obtenerEstructuraPorDefecto());
         }
     </script>
