@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Academia Nacional de la Historia - Portal de Noticias</title>
+    <title id="metaPageTitle">Academia Nacional de la Historia - Portal de Noticias</title>
     <!-- Tailwind CSS y FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,7 +36,7 @@
     <div class="bg-[#0B4F8A] text-white text-xs px-4 py-2">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <span class="font-serif">República Bolivariana de Venezuela | Academia Nacional de la Historia</span>
+                <span class="font-serif" id="lblBarraSuperior">República Bolivariana de Venezuela | Academia Nacional de la Historia</span>
                 <span id="cloudStatus" class="bg-blue-900 text-blue-200 px-2 py-0.5 rounded-full text-[10px]"><i class="fa-solid fa-cloud"></i> Firebase Conectado</span>
             </div>
             <div class="flex items-center gap-4">
@@ -50,12 +50,13 @@
     <header class="bg-white border-b border-slate-200 shadow-sm py-6 px-4">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-blue-50 border border-blue-200 rounded-full flex items-center justify-center text-[#0B4F8A] text-2xl shadow-inner">
-                    <i class="fa-solid fa-landmark"></i>
+                <div id="logoContainerHeader" class="w-16 h-16 bg-blue-50 border border-blue-200 rounded-full flex items-center justify-center text-[#0B4F8A] text-2xl shadow-inner overflow-hidden">
+                    <i class="fa-solid fa-landmark" id="logoIconDefault"></i>
+                    <img id="logoImgCustom" src="" class="w-full h-full object-cover hidden" alt="Logo">
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold font-serif text-[#0B4F8A]">Academia Nacional de la Historia</h1>
-                    <p class="text-xs text-slate-500 font-medium tracking-wide">PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES</p>
+                    <h1 class="text-xl md:text-2xl font-bold font-serif text-[#0B4F8A]" id="lblTituloPrincipal">Academia Nacional de la Historia</h1>
+                    <p class="text-xs text-slate-500 font-medium tracking-wide" id="lblSubtituloPrincipal">PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES</p>
                 </div>
             </div>
             <!-- Menú de Secciones Dinámico Sincronizado -->
@@ -74,8 +75,8 @@
     <!-- FRANJA DE TÍTULO DE SECCIÓN -->
     <div class="bg-[#0B4F8A] text-white py-8 px-4 shadow-inner">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-bold font-serif">Actualidad y Comunicados</h2>
-            <p class="text-xs text-blue-200 mt-1 font-serif">Difusión oficial de las actividades, ingresos de Individuos de Número y boletines académicos.</p>
+            <h2 class="text-3xl font-bold font-serif" id="lblFranjaTitulo">Actualidad y Comunicados</h2>
+            <p class="text-xs text-blue-200 mt-1 font-serif" id="lblFranjaSub">Difusión oficial de las actividades, ingresos de Individuos de Número y boletines académicos.</p>
         </div>
     </div>
 
@@ -166,13 +167,68 @@
                 </div>
             </div>
 
+            <!-- PERSONALIZACIÓN GENERAL DE TEXTOS, URLS Y LOGOTIPO -->
+            <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-6">
+                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i> Personalización General del Sitio (Textos, URLs y Logo)</h3>
+                
+                <form id="formPersonalizacion" onsubmit="guardarPersonalizacion(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Título Principal de la Web:</label>
+                            <input type="text" id="editTituloPrincipal" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Subtítulo o Lema:</label>
+                            <input type="text" id="editSubtituloPrincipal" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Texto de la Barra Superior:</label>
+                            <input type="text" id="editBarraSuperior" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">URL Oficial de la Institución (Ej. https://anhvenezuela.org):</label>
+                            <input type="url" id="editUrlOficial" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Título de la Franja de Sección:</label>
+                            <input type="text" id="editFranjaTitulo" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Descripción de la Franja:</label>
+                            <input type="text" id="editFranjaSub" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Subir Nuevo Logo Institucional:</label>
+                            <input type="file" id="editLogoFile" accept="image/*" onchange="procesarLogoSubido(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0B4F8A] hover:file:bg-blue-100 cursor-pointer">
+                            <input type="hidden" id="editLogoBase64" value="">
+                        </div>
+                        <div id="previewLogoContainer" class="hidden w-16 h-16 rounded-full overflow-hidden border border-slate-300">
+                            <img id="previewLogo" src="" alt="Vista previa logo" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="px-5 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-semibold">Guardar Cambios Generales</button>
+                    </div>
+                </form>
+            </div>
+
             <!-- GESTIÓN DE ETIQUETAS Y CATEGORÍAS DEL MENÚ -->
             <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
                 <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-tags text-amber-600 mr-2"></i> Gestión de Categorías y Etiquetas del Menú</h3>
-                <p class="text-xs text-slate-600">Agrega, modifica o elimina las etiquetas que aparecerán automáticamente en los botones del menú superior de la página y en los artículos:</p>
+                <p class="text-xs text-slate-600">Agrega, modifica o elimina las etiquetas que aparecerán en los botones del menú superior y en los artículos:</p>
                 
                 <div class="flex flex-wrap gap-2 items-center" id="listaEtiquetasAdmin">
-                    <!-- Se inyectan las etiquetas actuales con botón para eliminar -->
+                    <!-- Se inyectan las etiquetas -->
                 </div>
 
                 <div class="flex gap-2 pt-2 max-w-md">
@@ -220,7 +276,7 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Cargar Imagen desde tu Computadora:</label>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Cargar Imagen del Artículo:</label>
                             <input type="file" id="inputImagenFile" accept="image/*" onchange="procesarImagenSubida(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0B4F8A] hover:file:bg-blue-100 cursor-pointer">
                         </div>
                         <div class="flex items-center pt-6">
@@ -230,7 +286,6 @@
                             </label>
                         </div>
                     </div>
-                    <!-- Vista previa de la imagen cargada -->
                     <div id="previewImagenContainer" class="hidden w-32 h-24 rounded-lg overflow-hidden border border-slate-300">
                         <img id="previewImagen" src="" alt="Vista previa" class="w-full h-full object-cover">
                     </div>
@@ -270,10 +325,10 @@
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs">
             <div class="flex items-center space-x-3">
                 <i class="fa-solid fa-landmark text-amber-300 text-lg"></i>
-                <span class="font-serif">Academia Nacional de la Historia — Caracas, Venezuela. Todos los derechos reservados.</span>
+                <span class="font-serif" id="lblFooterTexto">Academia Nacional de la Historia — Caracas, Venezuela. Todos los derechos reservados.</span>
             </div>
             <div class="flex space-x-6 font-serif">
-                <a href="https://anhvenezuela.org" target="_blank" class="hover:underline text-blue-200">Sitio Institucional</a>
+                <a id="linkFooterInstitucional" href="https://anhvenezuela.org" target="_blank" class="hover:underline text-blue-200">Sitio Institucional</a>
                 <a href="#" onclick="abrirModalAcceso(); return false;" class="hover:underline text-blue-200">Mesa de Redacción</a>
             </div>
         </div>
@@ -323,7 +378,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const dbFirestore = firebase.firestore();
-        const docRef = dbFirestore.collection("portal").doc("datos_anh_etiquetas_v1");
+        const docRef = dbFirestore.collection("portal").doc("datos_anh_config_v2");
 
         let paginaActual = 1;
         const porPagina = 6;
@@ -335,6 +390,16 @@
         function obtenerEstructuraPorDefecto() {
             return {
                 admin: { usuario: "admin", clave: "anh2026*", correo: "secretaria@anhvenezuela.org", nombre: "Junta Directiva ANH" },
+                config: {
+                    tituloPrincipal: "Academia Nacional de la Historia",
+                    subtituloPrincipal: "PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES",
+                    barraSuperior: "República Bolivariana de Venezuela | Academia Nacional de la Historia",
+                    urlOficial: "https://anhvenezuela.org",
+                    franjaTitulo: "Actualidad y Comunicados",
+                    franjaSub: "Difusión oficial de las actividades, ingresos de Individuos de Número y boletines académicos.",
+                    footerTexto: "Academia Nacional de la Historia — Caracas, Venezuela. Todos los derechos reservados.",
+                    logoBase64: ""
+                },
                 categorias: [
                     "Institucional y Directiva",
                     "Individuos de Número / Conmemoraciones",
@@ -410,11 +475,83 @@
 
         function renderizarTodoPortal() {
             const db = obtenerDB();
+            aplicarConfiguracionVisual(db.config);
             renderizarMenuNavegacion(db.categorias);
             renderizarSelectCategoriasForm(db.categorias);
             renderizarEtiquetasAdmin(db.categorias);
             renderizarPortada(db.jornadas);
             renderizarTablaAdmin(db.jornadas);
+        }
+
+        function aplicarConfiguracionVisual(cfg) {
+            if (!cfg) return;
+            document.getElementById("metaPageTitle").innerText = `${cfg.tituloPrincipal} - Portal de Noticias`;
+            document.getElementById("lblBarraSuperior").innerText = cfg.barraSuperior;
+            document.getElementById("lblTituloPrincipal").innerText = cfg.tituloPrincipal;
+            document.getElementById("lblSubtituloPrincipal").innerText = cfg.subtituloPrincipal;
+            document.getElementById("lblFranjaTitulo").innerText = cfg.franjaTitulo;
+            document.getElementById("lblFranjaSub").innerText = cfg.franjaSub;
+            document.getElementById("lblFooterTexto").innerText = cfg.footerTexto;
+            
+            const linkInst = document.getElementById("linkFooterInstitucional");
+            linkInst.href = cfg.urlOficial;
+
+            // Logo
+            const iconDef = document.getElementById("logoIconDefault");
+            const imgCustom = document.getElementById("logoImgCustom");
+            if (cfg.logoBase64) {
+                imgCustom.src = cfg.logoBase64;
+                imgCustom.classList.remove("hidden");
+                iconDef.classList.add("hidden");
+            } else {
+                imgCustom.classList.add("hidden");
+                iconDef.classList.remove("hidden");
+            }
+
+            // Rellenar formulario de admin si existe
+            if (document.getElementById("editTituloPrincipal")) {
+                document.getElementById("editTituloPrincipal").value = cfg.tituloPrincipal || "";
+                document.getElementById("editSubtituloPrincipal").value = cfg.subtituloPrincipal || "";
+                document.getElementById("editBarraSuperior").value = cfg.barraSuperior || "";
+                document.getElementById("editUrlOficial").value = cfg.urlOficial || "";
+                document.getElementById("editFranjaTitulo").value = cfg.franjaTitulo || "";
+                document.getElementById("editFranjaSub").value = cfg.franjaSub || "";
+                document.getElementById("editLogoBase64").value = cfg.logoBase64 || "";
+                if (cfg.logoBase64) {
+                    document.getElementById("previewLogo").src = cfg.logoBase64;
+                    document.getElementById("previewLogoContainer").classList.remove("hidden");
+                }
+            }
+        }
+
+        function guardarPersonalizacion(e) {
+            e.preventDefault();
+            const db = obtenerDB();
+            db.config = {
+                tituloPrincipal: document.getElementById("editTituloPrincipal").value,
+                subtituloPrincipal: document.getElementById("editSubtituloPrincipal").value,
+                barraSuperior: document.getElementById("editBarraSuperior").value,
+                urlOficial: document.getElementById("editUrlOficial").value,
+                franjaTitulo: document.getElementById("editFranjaTitulo").value,
+                franjaSub: document.getElementById("editFranjaSub").value,
+                footerTexto: document.getElementById("editFranjaTitulo").value + " — Caracas, Venezuela.",
+                logoBase64: document.getElementById("editLogoBase64").value
+            };
+            guardarDB(db);
+            alert("¡Configuración general y logo actualizados con éxito en Firebase!");
+        }
+
+        function procesarLogoSubido(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64 = event.target.result;
+                document.getElementById("editLogoBase64").value = base64;
+                document.getElementById("previewLogo").src = base64;
+                document.getElementById("previewLogoContainer").classList.remove("hidden");
+            };
+            reader.readAsDataURL(file);
         }
 
         function renderizarMenuNavegacion(categorias) {
@@ -735,7 +872,6 @@
             const idEdit = document.getElementById("jornadaIdEdit").value;
             const imagenBase64 = document.getElementById("inputImagenBase64").value;
 
-            // Mantener imagen anterior si se está editando y no se subió una nueva
             let imagenFinal = imagenBase64;
             if (!imagenFinal && idEdit) {
                 const existente = db.jornadas.find(i => i.id === idEdit);
@@ -807,7 +943,7 @@
         }
 
         function cargarDatosBaseAdmin() {
-            if (!confirm("¿Restaurar base de datos inicial?")) return;
+            if (!confirm("¿Restaurar configuración y base de datos inicial?")) return;
             guardarDB(obtenerEstructuraPorDefecto());
         }
     </script>
