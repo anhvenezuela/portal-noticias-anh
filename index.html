@@ -701,3 +701,115 @@
                 } else { alert("Correo no registrado."); }
             } else {
                 const nueva = document.getElementById("recNuevaClave").value.trim();
+                db.admin.clave = nueva;
+                guardarDB(db);
+                alert("¡Contraseña actualizada!");
+                abrirModalAcceso();
+            }
+        }
+
+        function renderizarTablaAdmin(jornadas) {
+            const tbody = document.getElementById("tablaAdminJornadas");
+            tbody.innerHTML = "";
+            jornadas.forEach(j => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50";
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-600">${j.fecha}</td>
+                    <td class="p-3 font-bold font-serif text-[#0B4F8A] max-w-xs truncate">${j.titulo}</td>
+                    <td class="p-3"><span class="bg-blue-50 text-[#0B4F8A] px-2 py-0.5 rounded text-[10px] border border-blue-200">${j.lugar}</span></td>
+                    <td class="p-3 text-slate-600">${j.autor}</td>
+                    <td class="p-3 text-center">${j.destacada ? '<i class="fa-solid fa-star text-amber-500"></i>' : '-'}</td>
+                    <td class="p-3 text-right space-x-2">
+                        <button onclick="editarJornada('${j.id}')" class="px-2.5 py-1 bg-blue-50 text-[#0B4F8A] border border-blue-200 rounded text-xs">Editar</button>
+                        <button onclick="eliminarJornada('${j.id}')" class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded text-xs">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function guardarJornada(e) {
+            e.preventDefault();
+            const db = obtenerDB();
+            const idEdit = document.getElementById("jornadaIdEdit").value;
+            const imagenBase64 = document.getElementById("inputImagenBase64").value;
+
+            // Mantener imagen anterior si se está editando y no se subió una nueva
+            let imagenFinal = imagenBase64;
+            if (!imagenFinal && idEdit) {
+                const existente = db.jornadas.find(i => i.id === idEdit);
+                if (existente) imagenFinal = existente.imagen;
+            }
+
+            const nueva = {
+                id: idEdit ? idEdit : "anh_" + Date.now(),
+                fecha: document.getElementById("inputFecha").value,
+                lugar: document.getElementById("inputLugar").value,
+                autor: document.getElementById("inputAutor").value,
+                titulo: document.getElementById("inputTituloNoticia").value,
+                sumario: document.getElementById("inputSumarioNoticia").value,
+                contenido: document.getElementById("inputContenidoNoticia").value,
+                imagen: imagenFinal || "",
+                destacada: document.getElementById("inputDestacadaPortada").checked
+            };
+            if (nueva.destacada) {
+                db.jornadas.forEach(item => item.destacada = false);
+            }
+            if (idEdit) {
+                const idx = db.jornadas.findIndex(i => i.id === idEdit);
+                if (idx !== -1) db.jornadas[idx] = nueva;
+            } else {
+                db.jornadas.push(nueva);
+            }
+            guardarDB(db);
+            limpiarFormularioJornada();
+            alert("¡Publicación guardada en Firebase con éxito!");
+        }
+
+        function editarJornada(id) {
+            const db = obtenerDB();
+            const j = db.jornadas.find(i => i.id === id);
+            if (!j) return;
+            document.getElementById("jornadaIdEdit").value = j.id;
+            document.getElementById("inputFecha").value = j.fecha;
+            document.getElementById("inputLugar").value = j.lugar;
+            document.getElementById("inputAutor").value = j.autor;
+            document.getElementById("inputTituloNoticia").value = j.titulo;
+            document.getElementById("inputSumarioNoticia").value = j.sumario;
+            document.getElementById("inputContenidoNoticia").value = j.contenido;
+            document.getElementById("inputImagenBase64").value = j.imagen || "";
+            document.getElementById("inputDestacadaPortada").checked = j.destacada || false;
+
+            if (j.imagen) {
+                document.getElementById("previewImagen").src = j.imagen;
+                document.getElementById("previewImagenContainer").classList.remove("hidden");
+            } else {
+                document.getElementById("previewImagenContainer").classList.add("hidden");
+            }
+
+            window.scrollTo({ top: document.getElementById("jornadaForm").offsetTop - 50, behavior: 'smooth' });
+        }
+
+        function eliminarJornada(id) {
+            if (!confirm("¿Eliminar este artículo?")) return;
+            const db = obtenerDB();
+            db.jornadas = db.jornadas.filter(i => i.id !== id);
+            guardarDB(db);
+        }
+
+        function limpiarFormularioJornada() {
+            document.getElementById("jornadaForm").reset();
+            document.getElementById("jornadaIdEdit").value = "";
+            document.getElementById("inputImagenBase64").value = "";
+            document.getElementById("previewImagenContainer").classList.add("hidden");
+            document.getElementById("inputFecha").value = new Date().toISOString().split('T')[0];
+        }
+
+        function cargarDatosBaseAdmin() {
+            if (!confirm("¿Restaurar base de datos inicial?")) return;
+            guardarDB(obtenerEstructuraPorDefecto());
+        }
+    </script>
+</body>
+</html>
