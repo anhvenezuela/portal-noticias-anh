@@ -184,6 +184,7 @@
             <!-- FORMULARIO DE CREACIÓN / EDICIÓN DE ARTÍCULO -->
             <form id="jornadaForm" onsubmit="guardarJornada(event)" class="space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
                 <input type="hidden" id="jornadaIdEdit" value="">
+                <input type="hidden" id="inputImagenBase64" value="">
                 
                 <h3 id="formTitulo" class="text-base font-bold font-serif text-[#0B4F8A]">Redactar Nuevo Artículo o Noticia</h3>
 
@@ -195,7 +196,7 @@
                     <div>
                         <label class="block text-xs font-medium text-slate-700 mb-1">Categoría / Etiqueta:</label>
                         <select id="inputLugar" required class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
-                            <!-- Se poblará dinámicamente con las etiquetas creadas -->
+                            <!-- Se poblará dinámicamente -->
                         </select>
                     </div>
                     <div>
@@ -217,10 +218,10 @@
                         <label class="block text-xs font-medium text-slate-700 mb-1">Cuerpo Completo:</label>
                         <textarea id="inputContenidoNoticia" rows="6" placeholder="Contenido íntegro del artículo..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm font-serif"></textarea>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">URL de Imagen Ilustrativa:</label>
-                            <input type="url" id="inputImagenUrl" placeholder="https://..." class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Cargar Imagen desde tu Computadora:</label>
+                            <input type="file" id="inputImagenFile" accept="image/*" onchange="procesarImagenSubida(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0B4F8A] hover:file:bg-blue-100 cursor-pointer">
                         </div>
                         <div class="flex items-center pt-6">
                             <label class="flex items-center gap-2 cursor-pointer">
@@ -228,6 +229,10 @@
                                 <span class="text-xs font-bold text-slate-800">Marcar como Noticia Principal de Portada</span>
                             </label>
                         </div>
+                    </div>
+                    <!-- Vista previa de la imagen cargada -->
+                    <div id="previewImagenContainer" class="hidden w-32 h-24 rounded-lg overflow-hidden border border-slate-300">
+                        <img id="previewImagen" src="" alt="Vista previa" class="w-full h-full object-cover">
                     </div>
                 </div>
 
@@ -479,6 +484,20 @@
             }
         }
 
+        function procesarImagenSubida(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64String = event.target.result;
+                document.getElementById("inputImagenBase64").value = base64String;
+                const preview = document.getElementById("previewImagen");
+                preview.src = base64String;
+                document.getElementById("previewImagenContainer").classList.remove("hidden");
+            };
+            reader.readAsDataURL(file);
+        }
+
         function filtrarPorSeccionNav(seccion) {
             seccionFiltroActiva = seccion;
             paginaActual = 1;
@@ -682,96 +701,3 @@
                 } else { alert("Correo no registrado."); }
             } else {
                 const nueva = document.getElementById("recNuevaClave").value.trim();
-                db.admin.clave = nueva;
-                guardarDB(db);
-                alert("¡Contraseña actualizada!");
-                abrirModalAcceso();
-            }
-        }
-
-        function renderizarTablaAdmin(jornadas) {
-            const tbody = document.getElementById("tablaAdminJornadas");
-            tbody.innerHTML = "";
-            jornadas.forEach(j => {
-                const tr = document.createElement("tr");
-                tr.className = "hover:bg-slate-50";
-                tr.innerHTML = `
-                    <td class="p-3 text-slate-600">${j.fecha}</td>
-                    <td class="p-3 font-bold font-serif text-[#0B4F8A] max-w-xs truncate">${j.titulo}</td>
-                    <td class="p-3"><span class="bg-blue-50 text-[#0B4F8A] px-2 py-0.5 rounded text-[10px] border border-blue-200">${j.lugar}</span></td>
-                    <td class="p-3 text-slate-600">${j.autor}</td>
-                    <td class="p-3 text-center">${j.destacada ? '<i class="fa-solid fa-star text-amber-500"></i>' : '-'}</td>
-                    <td class="p-3 text-right space-x-2">
-                        <button onclick="editarJornada('${j.id}')" class="px-2.5 py-1 bg-blue-50 text-[#0B4F8A] border border-blue-200 rounded text-xs">Editar</button>
-                        <button onclick="eliminarJornada('${j.id}')" class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded text-xs">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function guardarJornada(e) {
-            e.preventDefault();
-            const db = obtenerDB();
-            const idEdit = document.getElementById("jornadaIdEdit").value;
-            const nueva = {
-                id: idEdit ? idEdit : "anh_" + Date.now(),
-                fecha: document.getElementById("inputFecha").value,
-                lugar: document.getElementById("inputLugar").value,
-                autor: document.getElementById("inputAutor").value,
-                titulo: document.getElementById("inputTituloNoticia").value,
-                sumario: document.getElementById("inputSumarioNoticia").value,
-                contenido: document.getElementById("inputContenidoNoticia").value,
-                imagen: document.getElementById("inputImagenUrl").value.trim(),
-                destacada: document.getElementById("inputDestacadaPortada").checked
-            };
-            if (nueva.destacada) {
-                db.jornadas.forEach(item => item.destacada = false);
-            }
-            if (idEdit) {
-                const idx = db.jornadas.findIndex(i => i.id === idEdit);
-                if (idx !== -1) db.jornadas[idx] = nueva;
-            } else {
-                db.jornadas.push(nueva);
-            }
-            guardarDB(db);
-            limpiarFormularioJornada();
-            alert("¡Publicación guardada en Firebase!");
-        }
-
-        function editarJornada(id) {
-            const db = obtenerDB();
-            const j = db.jornadas.find(i => i.id === id);
-            if (!j) return;
-            document.getElementById("jornadaIdEdit").value = j.id;
-            document.getElementById("inputFecha").value = j.fecha;
-            document.getElementById("inputLugar").value = j.lugar;
-            document.getElementById("inputAutor").value = j.autor;
-            document.getElementById("inputTituloNoticia").value = j.titulo;
-            document.getElementById("inputSumarioNoticia").value = j.sumario;
-            document.getElementById("inputContenidoNoticia").value = j.contenido;
-            document.getElementById("inputImagenUrl").value = j.imagen || "";
-            document.getElementById("inputDestacadaPortada").checked = j.destacada || false;
-            window.scrollTo({ top: document.getElementById("jornadaForm").offsetTop - 50, behavior: 'smooth' });
-        }
-
-        function eliminarJornada(id) {
-            if (!confirm("¿Eliminar este artículo?")) return;
-            const db = obtenerDB();
-            db.jornadas = db.jornadas.filter(i => i.id !== id);
-            guardarDB(db);
-        }
-
-        function limpiarFormularioJornada() {
-            document.getElementById("jornadaForm").reset();
-            document.getElementById("jornadaIdEdit").value = "";
-            document.getElementById("inputFecha").value = new Date().toISOString().split('T')[0];
-        }
-
-        function cargarDatosBaseAdmin() {
-            if (!confirm("¿Restaurar base de datos inicial?")) return;
-            guardarDB(obtenerEstructuraPorDefecto());
-        }
-    </script>
-</body>
-</html>
