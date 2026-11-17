@@ -412,7 +412,6 @@
             renderizarTablaAdmin(db.jornadas);
         }
 
-        // --- GESTIÓN DINÁMICA DEL MENÚ Y ETIQUETAS ---
         function renderizarMenuNavegacion(categorias) {
             const nav = document.getElementById("menuCategoriasPublicas");
             nav.innerHTML = `
@@ -473,7 +472,7 @@
         }
 
         function eliminarEtiqueta(cat) {
-            if (confirm(`¿Eliminar la categoría "${cat}"? Los artículos asociados mantendrán su texto pero ya no estará en el menú principal.`)) {
+            if (confirm(`¿Eliminar la categoría "${cat}"?`)) {
                 const db = obtenerDB();
                 db.categorias = db.categorias.filter(c => c !== cat);
                 guardarDB(db);
