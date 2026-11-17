@@ -40,7 +40,7 @@
                 <span id="cloudStatus" class="bg-blue-900 text-blue-200 px-2 py-0.5 rounded-full text-[10px]"><i class="fa-solid fa-cloud"></i> Firebase Conectado</span>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="cambiarVista('publico')" class="hover:underline"><i class="fa-solid fa-house mr-1"></i> Inicio</button>
+                <button onclick="navegarA('todos')" class="hover:underline"><i class="fa-solid fa-house mr-1"></i> Inicio</button>
                 <button onclick="abrirModalAcceso()" class="hover:underline font-semibold text-amber-200"><i class="fa-solid fa-lock mr-1"></i> Mesa de Redacción</button>
             </div>
         </div>
@@ -59,7 +59,7 @@
                     <p class="text-xs text-slate-500 font-medium tracking-wide" id="lblSubtituloPrincipal">PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES</p>
                 </div>
             </div>
-            <!-- Menú de Secciones Sincronizado -->
+            <!-- Menú de Subpáginas Dinámico Sincronizado -->
             <nav id="menuCategoriasPublicas" class="flex flex-wrap items-center justify-center lg:justify-end gap-2 text-xs uppercase tracking-wider font-semibold text-slate-700">
                 <!-- Se inyecta dinámicamente -->
             </nav>
@@ -72,7 +72,7 @@
         </div>
     </header>
 
-    <!-- FRANJA DE TÍTULO DE SECCIÓN DINÁMICA -->
+    <!-- FRANJA DE TÍTULO DE SUBPÁGINA -->
     <div class="bg-[#0B4F8A] text-white py-8 px-4 shadow-inner">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-3xl font-bold font-serif" id="lblFranjaTitulo">Actualidad y Comunicados</h2>
@@ -132,13 +132,13 @@
         <!-- VISTA PÚBLICA -->
         <div id="vistaPublica" class="space-y-12">
             
-            <!-- NOTICIA DESTACADA DE PORTADA (SOLO EN INICIO) -->
+            <!-- PORTADA DESTACADA (SOLO EN INICIO) -->
             <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
                 <!-- Se inyecta dinámicamente -->
             </div>
 
-            <!-- SECCIÓN DE LISTADO DE ARTÍCULOS EXCLUSIVA POR CATEGORÍA -->
-            <div id="seccionListadoPublicaciones" class="space-y-6 scroll-mt-8">
+            <!-- SUBPÁGINA / LISTADO EXCLUSIVO DE CATEGORÍA -->
+            <div id="seccionListadoPublicaciones" class="space-y-6">
                 <div class="border-b border-slate-300 pb-3 flex justify-between items-center">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-[#0B4F8A]" id="tituloSeccionActual">Archivo de Publicaciones</h3>
                     <span id="contadorPublicaciones" class="text-xs text-slate-500"></span>
@@ -462,16 +462,43 @@
             });
         }
 
+        // Manejador de rutas (Subpáginas con URL Hash ej. #seccion/Institucional-y-Directiva)
+        window.addEventListener("hashchange", () => {
+            leerRutaHash();
+        });
+
         window.addEventListener("DOMContentLoaded", () => {
             docRef.onSnapshot((doc) => {
                 if (doc.exists) {
                     dbMemoria = doc.data();
+                    leerRutaHash();
                     renderizarTodoPortal();
                 } else {
                     guardarDB(obtenerEstructuraPorDefecto());
                 }
             });
         });
+
+        function leerRutaHash() {
+            const hash = window.location.hash;
+            if (hash.startsWith("#seccion/")) {
+                const categoriaDecodificada = decodeURIComponent(hash.replace("#seccion/", ""));
+                seccionFiltroActiva = categoriaDecodificada;
+            } else {
+                seccionFiltroActiva = "todos";
+            }
+            paginaActual = 1;
+            if (dbMemoria) renderizarTodoPortal();
+        }
+
+        function navegarA(categoria) {
+            if (categoria === 'todos') {
+                window.location.hash = "";
+            } else {
+                window.location.hash = `#seccion/${encodeURIComponent(categoria)}`;
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
         function renderizarTodoPortal() {
             const db = obtenerDB();
@@ -489,8 +516,16 @@
             document.getElementById("lblBarraSuperior").innerText = cfg.barraSuperior;
             document.getElementById("lblTituloPrincipal").innerText = cfg.tituloPrincipal;
             document.getElementById("lblSubtituloPrincipal").innerText = cfg.subtituloPrincipal;
-            document.getElementById("lblFranjaTitulo").innerText = seccionFiltroActiva === 'todos' ? cfg.franjaTitulo : `Sección: ${seccionFiltroActiva}`;
-            document.getElementById("lblFranjaSub").innerText = seccionFiltroActiva === 'todos' ? cfg.franjaSub : `Mostrando publicaciones exclusivas de la categoría ${seccionFiltroActiva}.`;
+            
+            // Subpágina / Franja dinámica
+            if (seccionFiltroActiva === 'todos') {
+                document.getElementById("lblFranjaTitulo").innerText = cfg.franjaTitulo;
+                document.getElementById("lblFranjaSub").innerText = cfg.franjaSub;
+            } else {
+                document.getElementById("lblFranjaTitulo").innerText = `Subpágina: ${seccionFiltroActiva}`;
+                document.getElementById("lblFranjaSub").innerText = `Listado oficial y exclusivo de publicaciones correspondientes a la categoría ${seccionFiltroActiva}.`;
+            }
+
             document.getElementById("lblFooterTexto").innerText = cfg.footerTexto;
             
             const linkInst = document.getElementById("linkFooterInstitucional");
@@ -555,18 +590,17 @@
         function renderizarMenuNavegacion(categorias) {
             const nav = document.getElementById("menuCategoriasPublicas");
             nav.innerHTML = `
-                <a href="#seccionListadoPublicaciones" onclick="filtrarPorSeccionNav('todos'); return false;" class="px-3 py-1.5 rounded-lg transition ${seccionFiltroActiva === 'todos' ? 'bg-[#0B4F8A] text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">Inicio</a>
+                <a href="#" onclick="navegarA('todos'); return false;" class="px-3 py-1.5 rounded-lg transition ${seccionFiltroActiva === 'todos' ? 'bg-[#0B4F8A] text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">Inicio</a>
             `;
             categorias.forEach(cat => {
                 const activo = seccionFiltroActiva === cat ? 'bg-[#0B4F8A] text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700';
                 const a = document.createElement("a");
-                a.href = "#seccionListadoPublicaciones";
+                a.href = `#seccion/${encodeURIComponent(cat)}`;
                 a.className = `px-3 py-1.5 rounded-lg transition ${activo}`;
                 a.innerText = cat;
                 a.onclick = (e) => {
                     e.preventDefault();
-                    filtrarPorSeccionNav(cat);
-                    document.getElementById("seccionListadoPublicaciones").scrollIntoView({ behavior: 'smooth' });
+                    navegarA(cat);
                 };
                 nav.appendChild(a);
             });
@@ -612,7 +646,7 @@
             db.categorias.push(nueva);
             guardarDB(db);
             input.value = "";
-            alert("¡Categoría agregada al menú con éxito!");
+            alert("¡Categoría y nueva subpágina agregadas con éxito!");
         }
 
         function eliminarEtiqueta(cat) {
@@ -637,12 +671,6 @@
             reader.readAsDataURL(file);
         }
 
-        function filtrarPorSeccionNav(seccion) {
-            seccionFiltroActiva = seccion;
-            paginaActual = 1;
-            renderizarTodoPortal();
-        }
-
         function toggleBuscadorHeader() {
             document.getElementById("buscadorHeaderBox").classList.toggle("hidden");
         }
@@ -654,7 +682,7 @@
             const contadorPub = document.getElementById("contadorPublicaciones");
             const tituloSeccion = document.getElementById("tituloSeccionActual");
 
-            tituloSeccion.innerText = seccionFiltroActiva === 'todos' ? 'Archivo de Publicaciones' : `Sección: ${seccionFiltroActiva}`;
+            tituloSeccion.innerText = seccionFiltroActiva === 'todos' ? 'Archivo de Publicaciones' : `Publicaciones en: ${seccionFiltroActiva}`;
 
             const fechaFiltro = document.getElementById("filtroFecha").value;
             const textoFiltro = document.getElementById("filtroTexto").value.toLowerCase();
@@ -675,7 +703,7 @@
             contadorPub.innerText = `${filtradas.length} artículos encontrados`;
 
             let destacada = filtradas.find(j => j.destacada) || filtradas[0];
-            // Mostrar la noticia destacada principal SOLAMENTE si estamos en la vista de "Inicio"
+            // Mostrar la noticia principal de portada SOLAMENTE en la página de "Inicio"
             if (destacada && seccionFiltroActiva === "todos" && !textoFiltro && !fechaFiltro) {
                 portadaContainer.style.display = "grid";
                 portadaContainer.innerHTML = `
@@ -708,7 +736,7 @@
 
             listaContainer.innerHTML = "";
             if (paginadas.length === 0) {
-                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No se encontraron publicaciones en esta sección o categoría.</div>`;
+                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No se encontraron publicaciones en esta subpágina o categoría.</div>`;
                 pagContenedor.innerHTML = "";
                 return;
             }
@@ -751,7 +779,6 @@
         function limpiarFiltros() {
             document.getElementById("filtroTexto").value = "";
             document.getElementById("filtroFecha").value = "";
-            seccionFiltroActiva = "todos";
             paginaActual = 1;
             renderizarTodoPortal();
         }
