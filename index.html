@@ -473,7 +473,7 @@
                     const datosRemotos = doc.data();
                     const estructuraDef = obtenerEstructuraPorDefecto();
                     
-                    // Fusión inteligente para preservar todas las noticias añadidas por el usuario en Firebase
+                    // Fusión inteligente para preservar todas las noticias añadidas por el usuario en Firebase sin límite
                     dbMemoria = {
                         admin: datosRemotos.admin || estructuraDef.admin,
                         config: datosRemotos.config || estructuraDef.config,
@@ -938,7 +938,7 @@
                 const idx = db.jornadas.findIndex(i => i.id === idEdit);
                 if (idx !== -1) db.jornadas[idx] = nueva;
             } else {
-                db.jornadas.unshift(nueva); // Agrega las nuevas al inicio para que se vean primero
+                db.jornadas.unshift(nueva);
             }
             guardarDB(db);
             limpiarFormularioJornada();
