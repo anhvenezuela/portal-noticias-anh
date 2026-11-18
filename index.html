@@ -20,7 +20,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F9F8F6; color: #1D1D1B; scroll-behavior: smooth; }
         .font-serif { font-family: 'Playfair Display', serif; }
-        /* Estilos para el editor Quill */
         .ql-editor { font-family: 'Playfair Display', serif; font-size: 1rem; min-height: 200px; background-color: #fff; }
         .ql-toolbar.ql-snow { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; background-color: #f8fafc; border-color: #cbd5e1; }
         .ql-container.ql-snow { border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-color: #cbd5e1; }
@@ -173,17 +172,20 @@
                 </form>
             </div>
 
-            <!-- GESTIÓN DE CATEGORÍAS -->
+            <!-- GESTIÓN AVANZADA DE CATEGORÍAS (REORDENAR, EDITAR Y ELIMINAR) -->
             <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
-                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-tags text-amber-600 mr-2"></i> Gestión de Categorías del Menú</h3>
-                <div class="flex flex-wrap gap-2 items-center" id="listaEtiquetasAdmin"></div>
+                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-tags text-amber-600 mr-2"></i> Gestión y Orden de Categorías</h3>
+                <p class="text-xs text-slate-500">Usa las flechas para cambiar el orden en que aparecen en el menú, edítalas o elimínalas según prefieras.</p>
+                
+                <div class="space-y-2" id="listaEtiquetasAdmin"></div>
+
                 <div class="flex gap-2 pt-2 max-w-md">
                     <input type="text" id="nuevaEtiquetaInput" placeholder="Nueva categoría..." class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
                     <button type="button" onclick="agregarEtiquetaNueva()" class="px-4 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-semibold whitespace-nowrap">Agregar</button>
                 </div>
             </div>
 
-            <!-- FORMULARIO DE NOTICIAS CON EDITOR RICO -->
+            <!-- FORMULARIO DE NOTICIAS -->
             <form id="jornadaForm" onsubmit="guardarJornada(event)" class="space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
                 <input type="hidden" id="jornadaIdEdit" value="">
                 <input type="hidden" id="inputImagenBase64" value="">
@@ -214,8 +216,7 @@
                         <textarea id="inputSumarioNoticia" rows="2" placeholder="Breve resumen..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Cuerpo Completo (Texto enriquecido con formato, negritas, cursivas, tamaño y alineación):</label>
-                        <!-- Contenedor del Editor Quill -->
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Cuerpo Completo:</label>
                         <div id="editorQuillContainer"></div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -293,7 +294,6 @@
             </div>
             <div class="space-y-4">
                 <div id="modalSumario" class="text-sm font-semibold text-slate-700 italic border-l-4 border-[#0B4F8A] pl-4 font-serif"></div>
-                <!-- Contenido con HTML enriquecido (formatos guardados) -->
                 <div id="modalContenido" class="text-sm text-slate-800 leading-relaxed font-serif space-y-4"></div>
             </div>
             <div class="border-t pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -307,7 +307,6 @@
 
     <!-- Quill.js JS -->
     <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
-    <!-- SCRIPT DE LÓGICA -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDoOZHIgxTbL_Qs-d2rwWFMJeooCKsKQY4",
@@ -331,7 +330,6 @@
         let sesionAdminActiva = false;
         let seccionFiltroActiva = "todos";
 
-        // Inicializar el editor Quill al cargar la página
         window.addEventListener("DOMContentLoaded", () => {
             quillEditor = new Quill('#editorQuillContainer', {
                 theme: 'snow',
@@ -407,7 +405,7 @@
                 renderizarTodoPortal();
             }).catch((error) => {
                 console.error("Error Firebase:", error);
-                alert("Error al guardar. Comprueba que las imágenes no sean muy pesadas.");
+                alert("Error al guardar.");
             });
         }
 
@@ -613,14 +611,34 @@
             if (valorActual) select.value = valorActual;
         }
 
+        // Renderizado de la lista de categorías en administración con botones de Orden, Edición y Eliminación
         function renderizarEtiquetasAdmin(categorias) {
             const contenedor = document.getElementById("listaEtiquetasAdmin");
             contenedor.innerHTML = "";
-            categorias.forEach(cat => {
-                const span = document.createElement("span");
-                span.className = "inline-flex items-center gap-2 bg-blue-50 text-[#0B4F8A] border border-blue-200 px-3 py-1 rounded-full text-xs font-semibold";
-                span.innerHTML = `<span>${cat}</span><button type="button" onclick="eliminarEtiqueta('${cat}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-xmark"></i></button>`;
-                contenedor.appendChild(span);
+            categorias.forEach((cat, index) => {
+                const row = document.createElement("div");
+                row.className = "flex items-center justify-between bg-white border border-slate-200 p-2.5 rounded-lg text-xs shadow-sm";
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-[#0B4F8A]">${index + 1}.</span>
+                        <span class="font-medium text-slate-800">${cat}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="moverEtiqueta(${index}, -1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded" title="Subir orden" ${index === 0 ? 'disabled opacity-40' : ''}>
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </button>
+                        <button type="button" onclick="moverEtiqueta(${index}, 1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded" title="Bajar orden" ${index === categorias.length - 1 ? 'disabled opacity-40' : ''}>
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                        <button type="button" onclick="editarEtiqueta(${index})" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#0B4F8A] rounded font-medium ml-2">
+                            <i class="fa-solid fa-pen mr-1"></i> Editar
+                        </button>
+                        <button type="button" onclick="eliminarEtiqueta('${cat}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded font-medium">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                contenedor.appendChild(row);
             });
         }
 
@@ -636,8 +654,42 @@
             alert("¡Categoría creada con éxito!");
         }
 
+        function moverEtiqueta(index, direccion) {
+            const db = obtenerDB();
+            const nuevoIndex = index + direccion;
+            if (nuevoIndex < 0 || nuevoIndex >= db.categorias.length) return;
+            const temp = db.categorias[index];
+            db.categorias[index] = db.categorias[nuevoIndex];
+            db.categorias[nuevoIndex] = temp;
+            guardarDB(db);
+        }
+
+        function editarEtiqueta(index) {
+            const db = obtenerDB();
+            const actual = db.categorias[index];
+            const nuevoNombre = prompt("Modifica el nombre de la categoría:", actual);
+            if (!nuevoNombre || !nuevoNombre.trim()) return;
+            const nombreLimpio = nuevoNombre.trim();
+            if (db.categorias.includes(nombreLimpio)) {
+                alert("Ya existe otra categoría con ese nombre.");
+                return;
+            }
+            
+            db.categorias[index] = nombreLimpio;
+
+            // Actualizar también los artículos que tenían la categoría anterior
+            db.jornadas.forEach(j => {
+                if (j.lugar === actual) {
+                    j.lugar = nombreLimpio;
+                }
+            });
+
+            guardarDB(db);
+            alert("¡Categoría editada y actualizada en los artículos con éxito!");
+        }
+
         function eliminarEtiqueta(cat) {
-            if (confirm(`¿Eliminar la categoría "${cat}"?`)) {
+            if (confirm(`¿Estás seguro de eliminar la categoría "${cat}"?`)) {
                 const db = obtenerDB();
                 db.categorias = db.categorias.filter(c => c !== cat);
                 guardarDB(db);
@@ -766,8 +818,6 @@
             document.getElementById("modalTitulo").innerText = j.titulo;
             document.getElementById("modalSubInfo").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${j.fecha} &nbsp;|&nbsp; <i class="fa-solid fa-pen-nib mr-1 text-[#0B4F8A]"></i> ${j.autor}`;
             document.getElementById("modalSumario").innerText = j.sumario;
-            
-            // Inyectar el contenido HTML enriquecido respetando negritas, cursivas, alineación y párrafos
             document.getElementById("modalContenido").innerHTML = j.contenido;
 
             const imgContainer = document.getElementById("modalImagenContainer");
@@ -854,7 +904,6 @@
                 if (existente) imagenFinal = existente.imagen;
             }
 
-            // Obtener el contenido enriquecido (HTML) directamente del editor Quill
             const contenidoHTML = quillEditor.root.innerHTML;
 
             const nueva = {
@@ -879,7 +928,7 @@
             }
             guardarDB(db);
             limpiarFormularioJornada();
-            alert("¡Publicación guardada con éxito en Firebase con todo su formato!");
+            alert("¡Publicación guardada con éxito en Firebase!");
         }
 
         function editarJornada(id) {
@@ -893,7 +942,6 @@
             document.getElementById("inputTituloNoticia").value = j.titulo;
             document.getElementById("inputSumarioNoticia").value = j.sumario;
             
-            // Cargar el HTML guardado dentro del editor Quill
             quillEditor.root.innerHTML = j.contenido || "";
 
             document.getElementById("inputImagenBase64").value = j.imagen || "";
@@ -920,7 +968,7 @@
             document.getElementById("jornadaForm").reset();
             document.getElementById("jornadaIdEdit").value = "";
             document.getElementById("inputImagenBase64").value = "";
-            quillEditor.root.innerHTML = ""; // Limpiar editor
+            quillEditor.root.innerHTML = "";
             document.getElementById("previewImagenContainer").classList.add("hidden");
             document.getElementById("inputFecha").value = new Date().toISOString().split('T')[0];
         }
