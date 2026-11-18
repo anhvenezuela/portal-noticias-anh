@@ -10,6 +10,8 @@
     <!-- Tailwind CSS y FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Quill.js CSS (Editor de texto enriquecido) -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
     <!-- Google Fonts: Inter y Playfair Display -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Firebase App y Firestore SDK -->
@@ -18,16 +20,10 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F9F8F6; color: #1D1D1B; scroll-behavior: smooth; }
         .font-serif { font-family: 'Playfair Display', serif; }
-        .letra-capitular::first-letter {
-            font-family: 'Playfair Display', serif;
-            font-size: 3.2rem;
-            float: left;
-            line-height: 0.8;
-            padding-right: 0.75rem;
-            padding-top: 0.2rem;
-            font-weight: bold;
-            color: #0B4F8A;
-        }
+        /* Estilos para el editor Quill */
+        .ql-editor { font-family: 'Playfair Display', serif; font-size: 1rem; min-height: 200px; background-color: #fff; }
+        .ql-toolbar.ql-snow { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; background-color: #f8fafc; border-color: #cbd5e1; }
+        .ql-container.ql-snow { border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-color: #cbd5e1; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -59,12 +55,8 @@
                     <p class="text-xs text-slate-500 font-medium tracking-wide" id="lblSubtituloPrincipal">PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES</p>
                 </div>
             </div>
-            <!-- Menú de Subpáginas Hipervinculadas -->
-            <nav id="menuCategoriasPublicas" class="flex flex-wrap items-center justify-center lg:justify-end gap-2 text-xs uppercase tracking-wider font-semibold text-slate-700">
-                <!-- Se inyecta dinámicamente con hipervínculos exactos -->
-            </nav>
+            <nav id="menuCategoriasPublicas" class="flex flex-wrap items-center justify-center lg:justify-end gap-2 text-xs uppercase tracking-wider font-semibold text-slate-700"></nav>
         </div>
-        <!-- Buscador Desplegable -->
         <div id="buscadorHeaderBox" class="hidden max-w-3xl mx-auto mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 flex gap-2">
             <input type="text" id="filtroTexto" oninput="renderizarTodoPortal()" placeholder="Buscar por título, autor o tema..." class="w-full bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-[#0B4F8A]">
             <input type="date" id="filtroFecha" oninput="renderizarTodoPortal()" class="bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs text-slate-800 focus:outline-none">
@@ -76,7 +68,7 @@
     <div class="bg-[#0B4F8A] text-white py-8 px-4 shadow-inner">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-3xl font-bold font-serif" id="lblFranjaTitulo">Actualidad y Comunicados</h2>
-            <p class="text-xs text-blue-200 mt-1 font-serif" id="lblFranjaSub">Difusión oficial de las actividades, ingresos de Individuos de Número y boletines académicos.</p>
+            <p class="text-xs text-blue-200 mt-1 font-serif" id="lblFranjaSub">Difusión oficial de las actividades e investigaciones.</p>
         </div>
     </div>
 
@@ -92,7 +84,6 @@
                     </h3>
                     <button onclick="cerrarModalAcceso()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
-
                 <form id="formLogin" onsubmit="verificarLogin(event)" class="space-y-4">
                     <p class="text-xs text-slate-500">Acceso exclusivo para editores autorizados de la Academia.</p>
                     <div>
@@ -103,27 +94,9 @@
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña:</label>
                         <input type="password" id="loginClave" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0B4F8A] focus:outline-none">
                     </div>
-                    <div class="flex justify-between items-center pt-1">
-                        <button type="button" onclick="mostrarRecuperacion()" class="text-xs text-[#0B4F8A] hover:underline font-medium">¿Olvidaste tu clave?</button>
-                    </div>
                     <div class="flex justify-end gap-2 pt-2 border-t">
                         <button type="button" onclick="cerrarModalAcceso()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm">Cancelar</button>
                         <button type="submit" class="px-5 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-sm font-medium">Entrar</button>
-                    </div>
-                </form>
-
-                <form id="formRecuperar" onsubmit="procesarRecuperacion(event)" class="hidden space-y-4">
-                    <p class="text-xs text-slate-600">Ingresa tu correo institucional registrado:</p>
-                    <div>
-                        <input type="email" id="recCorreo" required placeholder="correo@academia.org" class="w-full px-3 py-2 border rounded-lg text-sm">
-                    </div>
-                    <div id="nuevaClaveBox" class="hidden space-y-3">
-                        <div class="bg-blue-50 text-[#0B4F8A] p-2 rounded text-xs">Correo verificado. Define tu nueva clave:</div>
-                        <input type="password" id="recNuevaClave" minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2 border rounded-lg text-sm">
-                    </div>
-                    <div class="flex justify-between items-center pt-2">
-                        <button type="button" onclick="abrirModalAcceso()" class="text-xs text-slate-500">Volver</button>
-                        <button type="submit" id="btnRecuperarSubmit" class="px-4 py-2 bg-[#0B4F8A] text-white rounded-lg text-sm font-medium">Verificar</button>
                     </div>
                 </form>
             </div>
@@ -131,35 +104,28 @@
 
         <!-- VISTA PÚBLICA -->
         <div id="vistaPublica" class="space-y-12">
-            
-            <!-- PORTADA DESTACADA (SOLO APARECE EN LA PÁGINA DE INICIO) -->
-            <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
-                <!-- Se inyecta dinámicamente -->
-            </div>
+            <div id="portadaDestacadaContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200"></div>
 
-            <!-- SUBPÁGINA / LISTADO EXCLUSIVO DE NOTICIAS POR CATEGORÍA -->
             <div id="seccionListadoPublicaciones" class="space-y-6">
                 <div class="border-b border-slate-300 pb-3 flex justify-between items-center">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-[#0B4F8A]" id="tituloSeccionActual">Archivo de Publicaciones</h3>
                     <span id="contadorPublicaciones" class="text-xs text-slate-500"></span>
                 </div>
                 <div id="pubListaInformes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                <!-- Paginación -->
                 <div id="paginacionContenedor" class="flex justify-center gap-2 pt-6"></div>
             </div>
-
         </div>
 
-        <!-- VISTA DE ADMINISTRACIÓN (MESA DE REDACCIÓN) -->
+        <!-- VISTA DE ADMINISTRACIÓN -->
         <div id="vistaAdmin" class="hidden space-y-8 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
                 <div>
                     <h2 class="text-xl font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-feather-pointed text-amber-600 mr-2"></i> Mesa de Redacción y Edición</h2>
-                    <p class="text-xs text-slate-500">Editor autorizado: <strong id="adminNombreDisplay" class="text-[#0B4F8A]">Junta Directiva</strong></p>
+                    <p class="text-xs text-slate-500">Editor autorizado: <strong class="text-[#0B4F8A]">Junta Directiva</strong></p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="cargarDatosBaseAdmin()" class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-[#0B4F8A] rounded-lg text-xs transition border border-blue-200">
-                        <i class="fa-solid fa-database mr-1"></i> Restaurar Base
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="recuperarNoticiasAnteriores()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-cloud-arrow-down"></i> Recuperar noticias anteriores
                     </button>
                     <button onclick="cerrarAdmin()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs transition">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> Salir
@@ -169,8 +135,7 @@
 
             <!-- PERSONALIZACIÓN GENERAL -->
             <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-6">
-                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i> Personalización General del Sitio (Textos, URLs y Logo)</h3>
-                
+                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-sliders text-amber-600 mr-2"></i> Personalización General del Sitio</h3>
                 <form id="formPersonalizacion" onsubmit="guardarPersonalizacion(event)" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -182,7 +147,6 @@
                             <input type="text" id="editSubtituloPrincipal" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Texto de la Barra Superior:</label>
@@ -193,55 +157,36 @@
                             <input type="url" id="editUrlOficial" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Título de la Franja de Sección:</label>
-                            <input type="text" id="editFranjaTitulo" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Descripción de la Franja:</label>
-                            <input type="text" id="editFranjaSub" required class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
-                        </div>
-                    </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Subir Nuevo Logo Institucional:</label>
-                            <input type="file" id="editLogoFile" accept="image/*" onchange="procesarLogoSubido(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0B4F8A] hover:file:bg-blue-100 cursor-pointer">
+                            <input type="file" id="editLogoFile" accept="image/*" onchange="procesarLogoSubido(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0B4F8A] cursor-pointer">
                             <input type="hidden" id="editLogoBase64" value="">
                         </div>
                         <div id="previewLogoContainer" class="hidden w-16 h-16 rounded-full overflow-hidden border border-slate-300">
-                            <img id="previewLogo" src="" alt="Vista previa logo" class="w-full h-full object-cover">
+                            <img id="previewLogo" src="" alt="Logo" class="w-full h-full object-cover">
                         </div>
                     </div>
-
                     <div class="flex justify-end pt-2">
                         <button type="submit" class="px-5 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-semibold">Guardar Cambios Generales</button>
                     </div>
                 </form>
             </div>
 
-            <!-- GESTIÓN DE ETIQUETAS Y CATEGORÍAS DEL MENÚ -->
+            <!-- GESTIÓN DE CATEGORÍAS -->
             <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
-                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-tags text-amber-600 mr-2"></i> Gestión de Categorías y Etiquetas del Menú</h3>
-                <p class="text-xs text-slate-600">Agrega, modifica o elimina las etiquetas que aparecerán en los botones del menú superior y en los artículos:</p>
-                
-                <div class="flex flex-wrap gap-2 items-center" id="listaEtiquetasAdmin">
-                    <!-- Se inyectan las etiquetas -->
-                </div>
-
+                <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-tags text-amber-600 mr-2"></i> Gestión de Categorías del Menú</h3>
+                <div class="flex flex-wrap gap-2 items-center" id="listaEtiquetasAdmin"></div>
                 <div class="flex gap-2 pt-2 max-w-md">
-                    <input type="text" id="nuevaEtiquetaInput" placeholder="Nueva categoría o etiqueta..." class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
-                    <button type="button" onclick="agregarEtiquetaNueva()" class="px-4 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-semibold whitespace-nowrap">Agregar al Menú</button>
+                    <input type="text" id="nuevaEtiquetaInput" placeholder="Nueva categoría..." class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
+                    <button type="button" onclick="agregarEtiquetaNueva()" class="px-4 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-semibold whitespace-nowrap">Agregar</button>
                 </div>
             </div>
 
-            <!-- FORMULARIO DE CREACIÓN / EDICIÓN DE ARTÍCULO -->
+            <!-- FORMULARIO DE NOTICIAS CON EDITOR RICO -->
             <form id="jornadaForm" onsubmit="guardarJornada(event)" class="space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
                 <input type="hidden" id="jornadaIdEdit" value="">
                 <input type="hidden" id="inputImagenBase64" value="">
-                
                 <h3 id="formTitulo" class="text-base font-bold font-serif text-[#0B4F8A]">Redactar Nuevo Artículo o Noticia</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -250,10 +195,8 @@
                         <input type="date" id="inputFecha" required class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Categoría / Etiqueta:</label>
-                        <select id="inputLugar" required class="w-full px-3 py-2 bg-white border rounded-lg text-sm">
-                            <!-- Se poblará dinámicamente -->
-                        </select>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Categoría:</label>
+                        <select id="inputLugar" required class="w-full px-3 py-2 bg-white border rounded-lg text-sm"></select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700 mb-1">Autor / Investigador:</label>
@@ -268,16 +211,17 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700 mb-1">Sumario o Entradilla:</label>
-                        <textarea id="inputSumarioNoticia" rows="2" placeholder="Breve resumen para la portada..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm"></textarea>
+                        <textarea id="inputSumarioNoticia" rows="2" placeholder="Breve resumen..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Cuerpo Completo:</label>
-                        <textarea id="inputContenidoNoticia" rows="6" placeholder="Contenido íntegro del artículo..." required class="w-full px-3 py-2 bg-white border rounded-lg text-sm font-serif"></textarea>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Cuerpo Completo (Texto enriquecido con formato, negritas, cursivas, tamaño y alineación):</label>
+                        <!-- Contenedor del Editor Quill -->
+                        <div id="editorQuillContainer"></div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Cargar Imagen del Artículo (Comprimida Automática):</label>
-                            <input type="file" id="inputImagenFile" accept="image/*" onchange="comprimirImagenSubida(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0B4F8A] hover:file:bg-blue-100 cursor-pointer">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Imagen del Artículo (Comprimida automática):</label>
+                            <input type="file" id="inputImagenFile" accept="image/*" onchange="comprimirImagenSubida(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0B4F8A] cursor-pointer">
                         </div>
                         <div class="flex items-center pt-6">
                             <label class="flex items-center gap-2 cursor-pointer">
@@ -293,11 +237,11 @@
 
                 <div class="flex justify-end gap-3 pt-4 border-t">
                     <button type="button" onclick="limpiarFormularioJornada()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs">Cancelar</button>
-                    <button type="submit" id="btnGuardarJornada" class="px-6 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white font-medium rounded-lg text-xs">Publicar Artículo</button>
+                    <button type="submit" class="px-6 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white font-medium rounded-lg text-xs">Publicar Artículo</button>
                 </div>
             </form>
 
-            <!-- TABLA DE GESTIÓN -->
+            <!-- TABLA -->
             <div class="space-y-4">
                 <h3 class="text-base font-bold font-serif text-[#0B4F8A]">Archivo de Publicaciones</h3>
                 <div class="overflow-x-auto">
@@ -306,7 +250,7 @@
                             <tr class="bg-slate-100 text-slate-700 uppercase border-b">
                                 <th class="p-3">Fecha</th>
                                 <th class="p-3">Título</th>
-                                <th class="p-3">Categoría / Etiqueta</th>
+                                <th class="p-3">Categoría</th>
                                 <th class="p-3">Autor</th>
                                 <th class="p-3 text-center">Portada</th>
                                 <th class="p-3 text-right">Acciones</th>
@@ -317,7 +261,6 @@
                 </div>
             </div>
         </div>
-
     </main>
 
     <!-- FOOTER -->
@@ -334,7 +277,7 @@
         </div>
     </footer>
 
-    <!-- MODAL DE LECTURA COMPLETA -->
+    <!-- MODAL LECTURA -->
     <div id="modalLectura" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-3xl w-full p-6 md:p-10 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-6">
             <div class="flex justify-between items-start border-b pb-4">
@@ -345,16 +288,14 @@
                 </div>
                 <button onclick="cerrarModalLectura()" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-
             <div id="modalImagenContainer" class="hidden rounded-xl overflow-hidden max-h-72 border border-slate-200">
                 <img id="modalImagen" src="" alt="Imagen" class="w-full h-full object-cover">
             </div>
-
             <div class="space-y-4">
                 <div id="modalSumario" class="text-sm font-semibold text-slate-700 italic border-l-4 border-[#0B4F8A] pl-4 font-serif"></div>
-                <div id="modalContenido" class="text-sm text-slate-800 leading-relaxed font-serif letra-capitular whitespace-pre-line"></div>
+                <!-- Contenido con HTML enriquecido (formatos guardados) -->
+                <div id="modalContenido" class="text-sm text-slate-800 leading-relaxed font-serif space-y-4"></div>
             </div>
-
             <div class="border-t pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <button onclick="copiarCitaBibliografica()" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-[#0B4F8A] border border-blue-200 rounded-lg text-xs font-medium transition flex items-center gap-2">
                     <i class="fa-solid fa-quote-left text-amber-600"></i> Copiar Cita Bibliográfica (APA)
@@ -364,7 +305,9 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
+    <!-- Quill.js JS -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+    <!-- SCRIPT DE LÓGICA -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDoOZHIgxTbL_Qs-d2rwWFMJeooCKsKQY4",
@@ -378,8 +321,9 @@
 
         firebase.initializeApp(firebaseConfig);
         const dbFirestore = firebase.firestore();
-        const docRef = dbFirestore.collection("portal").doc("datos_anh_config_v3"); // v3 para documento fresco independiente
+        const docRef = dbFirestore.collection("portal").doc("datos_anh_config_v4");
 
+        let quillEditor;
         let paginaActual = 1;
         const porPagina = 6;
         let noticiaSeleccionadaParaCita = null;
@@ -387,16 +331,51 @@
         let sesionAdminActiva = false;
         let seccionFiltroActiva = "todos";
 
-        function obtenerEstructuraPorDefecto() {
+        // Inicializar el editor Quill al cargar la página
+        window.addEventListener("DOMContentLoaded", () => {
+            quillEditor = new Quill('#editorQuillContainer', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ align: '' }, { align: 'center' }, { align: 'right' }, { align: 'justify' }],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            docRef.onSnapshot((doc) => {
+                if (doc.exists) {
+                    const datosRemotos = doc.data();
+                    const estructuraBase = obtenerEstructuraBase();
+                    
+                    dbMemoria = {
+                        admin: datosRemotos.admin || estructuraBase.admin,
+                        config: datosRemotos.config || estructuraBase.config,
+                        categorias: datosRemotos.categorias || estructuraBase.categorias,
+                        jornadas: datosRemotos.jornadas || []
+                    };
+                    
+                    leerRutaHash();
+                    renderizarTodoPortal();
+                } else {
+                    guardarDB(obtenerEstructuraBase());
+                }
+            });
+        });
+
+        function obtenerEstructuraBase() {
             return {
-                admin: { usuario: "admin", clave: "anh2026*", correo: "secretaria@anhvenezuela.org", nombre: "Junta Directiva ANH" },
+                admin: { usuario: "admin", clave: "anh2026*", correo: "secretaria@anhvenezuela.org" },
                 config: {
                     tituloPrincipal: "Academia Nacional de la Historia",
                     subtituloPrincipal: "PORTAL OFICIAL DE NOTICIAS, BOLETINES E INVESTIGACIONES",
                     barraSuperior: "República Bolivariana de Venezuela | Academia Nacional de la Historia",
                     urlOficial: "https://anhvenezuela.org",
                     franjaTitulo: "Actualidad y Comunicados",
-                    franjaSub: "Difusión oficial de las actividades, ingresos de Individuos de Número y boletines académicos.",
+                    franjaSub: "Difusión oficial de las actividades e investigaciones.",
                     footerTexto: "Academia Nacional de la Historia — Caracas, Venezuela. Todos los derechos reservados.",
                     logoBase64: ""
                 },
@@ -407,53 +386,18 @@
                     "Boletín y Publicaciones",
                     "Eventos, Conferencias y Concursos"
                 ],
-                jornadas: [
-                    {
-                        id: "anh_1",
-                        fecha: "2026-11-15",
-                        lugar: "Individuos de Número / Conmemoraciones",
-                        autor: "Dr. Tomás Straka",
-                        titulo: "Incorporación del nuevo Individuo de Número Sillón N° 12",
-                        sumario: "La Academia Nacional de la Historia celebró la solemne incorporación del ilustre historiador con su discurso sobre la historiografía republicana.",
-                        contenido: "En solemne sesión celebrada en el Salón de Sesiones de la Academia Nacional de la Historia, se procedió a la recepción oficial del nuevo Individuo de Número, quien ocupará el Sillón N° 12. Durante su discurso de orden, titulado 'Las fuentes primarias y la construcción de la conciencia nacional', destacó la importancia ineludible de preservar el patrimonio documental de la nación frente a los retos del siglo XXI.",
-                        imagen: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80",
-                        destacada: true
-                    },
-                    {
-                        id: "anh_2",
-                        fecha: "2026-11-10",
-                        lugar: "Boletín y Publicaciones",
-                        autor: "Comité Editorial",
-                        titulo: "Publicación del nuevo número del Boletín de la Academia Nacional de la Historia",
-                        sumario: "Ya se encuentra disponible la edición trimestral que recopila ensayos inéditos sobre historia colonial y contemporánea.",
-                        contenido: "El Comité Editorial se complace en anunciar la puesta en circulación del número más reciente del histórico Boletín de la Academia Nacional de la Historia, fundado en 1912. Esta edición incluye monografías especializadas sobre las rutas comerciales del cacao en la Provincia de Venezuela.",
-                        imagen: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
-                        destacada: false
-                    },
-                    {
-                        id: "anh_3",
-                        fecha: "2026-11-05",
-                        lugar: "Eventos, Conferencias y Concursos",
-                        autor: "Secretaría Académica",
-                        titulo: "Apertura del Concurso para el Premio Nacional de Historia Francisco González Guinán",
-                        sumario: "Se convoca a historiadores e investigadores a postular sus obras inéditas para la edición 2026 del galardón.",
-                        contenido: "La Academia Nacional de la Historia abre oficialmente el proceso de postulación para el Premio Nacional de Historia Francisco González Guinán en su edición 2026. Podrán participar autores nacionales y extranjeros.",
-                        imagen: "https://images.unsplash.com/photo-1507842217343-583bb7270b67?auto=format&fit=crop&w=800&q=80",
-                        destacada: false
-                    }
-                ]
+                jornadas: []
             };
         }
 
         function obtenerDB() {
-            return dbMemoria ? dbMemoria : obtenerEstructuraPorDefecto();
+            return dbMemoria ? dbMemoria : obtenerEstructuraBase();
         }
 
         function guardarDB(nuevaDb) {
             if (nuevaDb && nuevaDb.jornadas) {
                 nuevaDb.jornadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             }
-
             dbMemoria = nuevaDb;
             const status = document.getElementById("cloudStatus");
             if (status) status.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Sincronizando...`;
@@ -463,35 +407,53 @@
                 renderizarTodoPortal();
             }).catch((error) => {
                 console.error("Error Firebase:", error);
-                alert("Error al sincronizar con Firebase. Es posible que las imágenes sean muy pesadas. Intenta subir imágenes más livianas.");
+                alert("Error al guardar. Comprueba que las imágenes no sean muy pesadas.");
             });
         }
 
-        window.addEventListener("hashchange", () => { leerRutaHash(); });
-
-        window.addEventListener("DOMContentLoaded", () => {
-            docRef.onSnapshot((doc) => {
-                if (doc.exists) {
-                    const datosRemotos = doc.data();
-                    const estructuraDef = obtenerEstructuraPorDefecto();
-                    
-                    let jornadasFinales = (datosRemotos.jornadas && datosRemotos.jornadas.length > 0) ? datosRemotos.jornadas : estructuraDef.jornadas;
-                    jornadasFinales.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-                    dbMemoria = {
-                        admin: datosRemotos.admin || estructuraDef.admin,
-                        config: datosRemotos.config || estructuraDef.config,
-                        categorias: datosRemotos.categorias || estructuraDef.categorias,
-                        jornadas: jornadasFinales
-                    };
-                    
-                    leerRutaHash();
-                    renderizarTodoPortal();
-                } else {
-                    guardarDB(obtenerEstructuraPorDefecto());
+        async function recuperarNoticiasAnteriores() {
+            if (!confirm("¿Deseas buscar y rescatar las noticias de tu versión anterior en Firebase?")) return;
+            try {
+                const docViejo = await dbFirestore.collection("portal").doc("datos_anh_config_v2").get();
+                if (!docViejo.exists) {
+                    alert("No se encontró el documento de respaldo anterior (v2).");
+                    return;
                 }
-            });
-        });
+                const datosViejos = docViejo.data();
+                const noticiasViejas = datosViejos.jornadas || [];
+                
+                if (noticiasViejas.length === 0) {
+                    alert("El respaldo anterior no contiene noticias.");
+                    return;
+                }
+
+                const dbActual = obtenerDB();
+                const idsActuales = new Set(dbActual.jornadas.map(j => j.id));
+                let recuperadas = 0;
+
+                noticiasViejas.forEach(noticia => {
+                    if (!idsActuales.has(noticia.id)) {
+                        if (noticia.imagen && noticia.imagen.length > 200000) {
+                            noticia.imagen = "";
+                        }
+                        dbActual.jornadas.push(noticia);
+                        recuperadas++;
+                    }
+                });
+
+                if (recuperadas > 0) {
+                    guardarDB(dbActual);
+                    alert(`¡Se recuperaron ${recuperadas} noticias con éxito!`);
+                } else {
+                    alert("Todas las noticias del respaldo ya se encuentran en la base de datos.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Ocurrió un error al intentar recuperar las noticias.");
+            }
+        }
+
+        window.addEventListener("hashchange", () => { leerRutaHash(); });
 
         function leerRutaHash() {
             const hash = window.location.hash;
@@ -535,7 +497,7 @@
                 document.getElementById("lblFranjaSub").innerText = cfg.franjaSub;
             } else {
                 document.getElementById("lblFranjaTitulo").innerText = `Subpágina: ${seccionFiltroActiva}`;
-                document.getElementById("lblFranjaSub").innerText = `Listado oficial y exclusivo de publicaciones correspondientes a la categoría ${seccionFiltroActiva}.`;
+                document.getElementById("lblFranjaSub").innerText = `Listado oficial de publicaciones en la categoría ${seccionFiltroActiva}.`;
             }
 
             document.getElementById("lblFooterTexto").innerText = cfg.footerTexto;
@@ -557,8 +519,6 @@
                 document.getElementById("editSubtituloPrincipal").value = cfg.subtituloPrincipal || "";
                 document.getElementById("editBarraSuperior").value = cfg.barraSuperior || "";
                 document.getElementById("editUrlOficial").value = cfg.urlOficial || "";
-                document.getElementById("editFranjaTitulo").value = cfg.franjaTitulo || "";
-                document.getElementById("editFranjaSub").value = cfg.franjaSub || "";
                 document.getElementById("editLogoBase64").value = cfg.logoBase64 || "";
                 if (cfg.logoBase64) {
                     document.getElementById("previewLogo").src = cfg.logoBase64;
@@ -570,18 +530,13 @@
         function guardarPersonalizacion(e) {
             e.preventDefault();
             const db = obtenerDB();
-            db.config = {
-                tituloPrincipal: document.getElementById("editTituloPrincipal").value,
-                subtituloPrincipal: document.getElementById("editSubtituloPrincipal").value,
-                barraSuperior: document.getElementById("editBarraSuperior").value,
-                urlOficial: document.getElementById("editUrlOficial").value,
-                franjaTitulo: document.getElementById("editFranjaTitulo").value,
-                franjaSub: document.getElementById("editFranjaSub").value,
-                footerTexto: document.getElementById("editFranjaTitulo").value + " — Caracas, Venezuela. Todos los derechos reservados.",
-                logoBase64: document.getElementById("editLogoBase64").value
-            };
+            db.config.tituloPrincipal = document.getElementById("editTituloPrincipal").value;
+            db.config.subtituloPrincipal = document.getElementById("editSubtituloPrincipal").value;
+            db.config.barraSuperior = document.getElementById("editBarraSuperior").value;
+            db.config.urlOficial = document.getElementById("editUrlOficial").value;
+            db.config.logoBase64 = document.getElementById("editLogoBase64").value;
             guardarDB(db);
-            alert("¡Configuración general y logo actualizados con éxito!");
+            alert("¡Configuración actualizada con éxito!");
         }
 
         function procesarLogoSubido(e) {
@@ -596,7 +551,6 @@
             reader.readAsDataURL(file);
         }
 
-        // Compresión automática de imágenes para que quepan infinitas noticias en Firebase
         function comprimirImagenSubida(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -609,7 +563,7 @@
                     const ctx = canvas.getContext('2d');
                     let width = img.width;
                     let height = img.height;
-                    const maxDim = 800; // Redimensionar máximo a 800px para ahorrar espacio
+                    const maxDim = 800;
                     if (width > height && width > maxDim) {
                         height *= maxDim / width;
                         width = maxDim;
@@ -620,7 +574,7 @@
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // Calidad comprimida óptima
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                     document.getElementById("inputImagenBase64").value = compressedBase64;
                     document.getElementById("previewImagen").src = compressedBase64;
                     document.getElementById("previewImagenContainer").classList.remove("hidden");
@@ -755,7 +709,7 @@
 
             listaContainer.innerHTML = "";
             if (paginadas.length === 0) {
-                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No se encontraron publicaciones en esta categoría.</div>`;
+                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No hay publicaciones registradas todavía en esta sección.</div>`;
                 pagContenedor.innerHTML = "";
                 return;
             }
@@ -812,7 +766,9 @@
             document.getElementById("modalTitulo").innerText = j.titulo;
             document.getElementById("modalSubInfo").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${j.fecha} &nbsp;|&nbsp; <i class="fa-solid fa-pen-nib mr-1 text-[#0B4F8A]"></i> ${j.autor}`;
             document.getElementById("modalSumario").innerText = j.sumario;
-            document.getElementById("modalContenido").innerText = j.contenido;
+            
+            // Inyectar el contenido HTML enriquecido respetando negritas, cursivas, alineación y párrafos
+            document.getElementById("modalContenido").innerHTML = j.contenido;
 
             const imgContainer = document.getElementById("modalImagenContainer");
             const imgElem = document.getElementById("modalImagen");
@@ -847,11 +803,7 @@
             }
         }
 
-        function abrirModalAcceso() {
-            document.getElementById("authModal").classList.remove("hidden");
-            document.getElementById("formLogin").classList.remove("hidden");
-            document.getElementById("formRecuperar").classList.add("hidden");
-        }
+        function abrirModalAcceso() { document.getElementById("authModal").classList.remove("hidden"); }
         function cerrarModalAcceso() { document.getElementById("authModal").classList.add("hidden"); }
 
         function verificarLogin(e) {
@@ -866,26 +818,6 @@
             } else { alert("Credenciales incorrectas."); }
         }
         function cerrarAdmin() { sesionAdminActiva = false; cambiarVista("publico"); }
-
-        function mostrarRecuperacion() {
-            document.getElementById("formLogin").classList.add("hidden");
-            document.getElementById("formRecuperar").classList.remove("hidden");
-        }
-
-        function procesarRecuperacion(e) {
-            e.preventDefault();
-            const db = obtenerDB();
-            const correo = document.getElementById("recCorreo").value.trim();
-            const box = document.getElementById("nuevaClaveBox");
-            if (box.classList.contains("hidden")) {
-                if (correo.toLowerCase() === db.admin.correo.toLowerCase()) { box.classList.remove("hidden"); } else { alert("Correo no registrado."); }
-            } else {
-                db.admin.clave = document.getElementById("recNuevaClave").value.trim();
-                guardarDB(db);
-                alert("¡Contraseña actualizada!");
-                abrirModalAcceso();
-            }
-        }
 
         function renderizarTablaAdmin(jornadas) {
             const tbody = document.getElementById("tablaAdminJornadas");
@@ -922,6 +854,9 @@
                 if (existente) imagenFinal = existente.imagen;
             }
 
+            // Obtener el contenido enriquecido (HTML) directamente del editor Quill
+            const contenidoHTML = quillEditor.root.innerHTML;
+
             const nueva = {
                 id: idEdit ? idEdit : "anh_" + Date.now(),
                 fecha: document.getElementById("inputFecha").value,
@@ -929,7 +864,7 @@
                 autor: document.getElementById("inputAutor").value,
                 titulo: document.getElementById("inputTituloNoticia").value,
                 sumario: document.getElementById("inputSumarioNoticia").value,
-                contenido: document.getElementById("inputContenidoNoticia").value,
+                contenido: contenidoHTML,
                 imagen: imagenFinal || "",
                 destacada: document.getElementById("inputDestacadaPortada").checked
             };
@@ -944,7 +879,7 @@
             }
             guardarDB(db);
             limpiarFormularioJornada();
-            alert("¡Publicación guardada con éxito en Firebase!");
+            alert("¡Publicación guardada con éxito en Firebase con todo su formato!");
         }
 
         function editarJornada(id) {
@@ -957,7 +892,10 @@
             document.getElementById("inputAutor").value = j.autor;
             document.getElementById("inputTituloNoticia").value = j.titulo;
             document.getElementById("inputSumarioNoticia").value = j.sumario;
-            document.getElementById("inputContenidoNoticia").value = j.contenido;
+            
+            // Cargar el HTML guardado dentro del editor Quill
+            quillEditor.root.innerHTML = j.contenido || "";
+
             document.getElementById("inputImagenBase64").value = j.imagen || "";
             document.getElementById("inputDestacadaPortada").checked = j.destacada || false;
 
@@ -982,13 +920,9 @@
             document.getElementById("jornadaForm").reset();
             document.getElementById("jornadaIdEdit").value = "";
             document.getElementById("inputImagenBase64").value = "";
+            quillEditor.root.innerHTML = ""; // Limpiar editor
             document.getElementById("previewImagenContainer").classList.add("hidden");
             document.getElementById("inputFecha").value = new Date().toISOString().split('T')[0];
-        }
-
-        function cargarDatosBaseAdmin() {
-            if (!confirm("¿Restaurar configuración y base de datos inicial?")) return;
-            guardarDB(obtenerEstructuraPorDefecto());
         }
     </script>
 </body>
