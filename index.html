@@ -450,6 +450,11 @@
         }
 
         function guardarDB(nuevaDb) {
+            // Ordenar estrictamente todas las jornadas por fecha descendiente antes de guardar
+            if (nuevaDb && nuevaDb.jornadas) {
+                nuevaDb.jornadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            }
+
             dbMemoria = nuevaDb;
             const status = document.getElementById("cloudStatus");
             if (status) status.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-pulse"></i> Sincronizando...`;
@@ -473,12 +478,15 @@
                     const datosRemotos = doc.data();
                     const estructuraDef = obtenerEstructuraPorDefecto();
                     
-                    // Fusión inteligente para preservar todas las noticias añadidas por el usuario en Firebase sin límite
+                    let jornadasFinales = (datosRemotos.jornadas && datosRemotos.jornadas.length > 0) ? datosRemotos.jornadas : estructuraDef.jornadas;
+                    // Asegurar orden por fecha descendiente al cargar
+                    jornadasFinales.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
                     dbMemoria = {
                         admin: datosRemotos.admin || estructuraDef.admin,
                         config: datosRemotos.config || estructuraDef.config,
                         categorias: datosRemotos.categorias || estructuraDef.categorias,
-                        jornadas: (datosRemotos.jornadas && datosRemotos.jornadas.length > 0) ? datosRemotos.jornadas : estructuraDef.jornadas
+                        jornadas: jornadasFinales
                     };
                     
                     leerRutaHash();
@@ -526,7 +534,6 @@
             document.getElementById("lblTituloPrincipal").innerText = cfg.tituloPrincipal;
             document.getElementById("lblSubtituloPrincipal").innerText = cfg.subtituloPrincipal;
             
-            // Textos de la franja según la subpágina activa
             if (seccionFiltroActiva === 'todos') {
                 document.getElementById("lblFranjaTitulo").innerText = cfg.franjaTitulo;
                 document.getElementById("lblFranjaSub").innerText = cfg.franjaSub;
@@ -708,11 +715,12 @@
                 return coincideSeccion && coincideFecha && coincideTexto;
             });
 
+            // Ordenamiento estricto por fecha descendiente (más reciente primero)
             filtradas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             contadorPub.innerText = `${filtradas.length} artículos encontrados`;
 
             let destacada = filtradas.find(j => j.destacada) || filtradas[0];
-            // Mostrar la noticia principal de portada SOLAMENTE en la página de inicio
+            
             if (destacada && seccionFiltroActiva === "todos" && !textoFiltro && !fechaFiltro) {
                 portadaContainer.style.display = "grid";
                 portadaContainer.innerHTML = `
@@ -890,7 +898,10 @@
         function renderizarTablaAdmin(jornadas) {
             const tbody = document.getElementById("tablaAdminJornadas");
             tbody.innerHTML = "";
-            jornadas.forEach(j => {
+            // Ordenar también en la tabla del panel de administración por fecha descendiente
+            let jornadasOrdenadas = [...jornadas].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            jornadasOrdenadas.forEach(j => {
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50";
                 tr.innerHTML = `
@@ -938,11 +949,11 @@
                 const idx = db.jornadas.findIndex(i => i.id === idEdit);
                 if (idx !== -1) db.jornadas[idx] = nueva;
             } else {
-                db.jornadas.unshift(nueva);
+                db.jornadas.push(nueva);
             }
             guardarDB(db);
             limpiarFormularioJornada();
-            alert("¡Publicación guardada en Firebase con éxito!");
+            alert("¡Publicación guardada y ordenada por fecha con éxito en Firebase!");
         }
 
         function editarJornada(id) {
