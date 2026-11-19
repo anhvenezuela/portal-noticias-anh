@@ -124,7 +124,7 @@
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <button onclick="recuperarNoticiasAnteriores()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-cloud-arrow-down"></i> Recuperar noticias anteriores
+                        <i class="fa-solid fa-cloud-arrow-down"></i> Forzar Rescate Total
                     </button>
                     <button onclick="cerrarAdmin()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs transition">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> Salir
@@ -172,13 +172,10 @@
                 </form>
             </div>
 
-            <!-- GESTIÓN AVANZADA DE CATEGORÍAS (REORDENAR, EDITAR Y ELIMINAR) -->
+            <!-- GESTIÓN AVANZADA DE CATEGORÍAS -->
             <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4">
                 <h3 class="text-base font-bold font-serif text-[#0B4F8A]"><i class="fa-solid fa-tags text-amber-600 mr-2"></i> Gestión y Orden de Categorías</h3>
-                <p class="text-xs text-slate-500">Usa las flechas para cambiar el orden en que aparecen en el menú, edítalas o elimínalas según prefieras.</p>
-                
                 <div class="space-y-2" id="listaEtiquetasAdmin"></div>
-
                 <div class="flex gap-2 pt-2 max-w-md">
                     <input type="text" id="nuevaEtiquetaInput" placeholder="Nueva categoría..." class="w-full px-3 py-2 bg-white border rounded-lg text-xs">
                     <button type="button" onclick="agregarEtiquetaNueva()" class="px-4 py-2 bg-[#0B4F8A] hover:bg-blue-800 text-white rounded-lg text-xs font-semibold whitespace-nowrap">Agregar</button>
@@ -320,7 +317,9 @@
 
         firebase.initializeApp(firebaseConfig);
         const dbFirestore = firebase.firestore();
-        const docRef = dbFirestore.collection("portal").doc("datos_anh_config_v4");
+        
+        // Documento principal definitivo (v5 blindado)
+        const docRef = dbFirestore.collection("portal").doc("datos_anh_config_v5");
 
         let quillEditor;
         let paginaActual = 1;
@@ -344,22 +343,27 @@
                 }
             });
 
-            docRef.onSnapshot((doc) => {
+            // Escuchar en tiempo real el documento v5 y realizar autocomprobación
+            docRef.onSnapshot(async (doc) => {
                 if (doc.exists) {
                     const datosRemotos = doc.data();
-                    const estructuraBase = obtenerEstructuraBase();
-                    
                     dbMemoria = {
-                        admin: datosRemotos.admin || estructuraBase.admin,
-                        config: datosRemotos.config || estructuraBase.config,
-                        categorias: datosRemotos.categorias || estructuraBase.categorias,
+                        admin: datosRemotos.admin || obtenerEstructuraBase().admin,
+                        config: datosRemotos.config || obtenerEstructuraBase().config,
+                        categorias: datosRemotos.categorias || obtenerEstructuraBase().categorias,
                         jornadas: datosRemotos.jornadas || []
                     };
                     
-                    leerRutaHash();
-                    renderizarTodoPortal();
+                    // Si está vacío, intentar rescate automático inmediato de v2/v3/v4
+                    if (dbMemoria.jornadas.length === 0) {
+                        await autoRescatarNoticiasOcultas();
+                    } else {
+                        leerRutaHash();
+                        renderizarTodoPortal();
+                    }
                 } else {
-                    guardarDB(obtenerEstructuraBase());
+                    // Si no existe, intentar rescatar antes de iniciar en blanco
+                    await autoRescatarNoticiasOcultas();
                 }
             });
         });
@@ -405,50 +409,53 @@
                 renderizarTodoPortal();
             }).catch((error) => {
                 console.error("Error Firebase:", error);
-                alert("Error al guardar.");
+                alert("Error al guardar en Firebase.");
+            });
+        }
+
+        // Función de autocomprobación y rescate automático en la nube
+        async function autoRescatarNoticiasOcultas() {
+            const versionesAnteriores = ["datos_anh_config_v4", "datos_anh_config_v3", "datos_anh_config_v2"];
+            let noticiasRescatadas = [];
+            let configRescatada = null;
+            let categoriasRescatadas = null;
+
+            for (let v of versionesAnteriores) {
+                try {
+                    const docAnt = await dbFirestore.collection("portal").doc(v).get();
+                    if (docAnt.exists) {
+                        const datos = docAnt.data();
+                        if (datos.jornadas && datos.jornadas.length > 0 && noticiasRescatadas.length === 0) {
+                            noticiasRescatadas = datos.jornadas;
+                        }
+                        if (datos.config && !configRescatada) {
+                            configRescatada = datos.config;
+                        }
+                        if (datos.categorias && !categoriasRescatadas) {
+                            categoriasRescatadas = datos.categorias;
+                        }
+                    }
+                } catch(e) { console.log(e); }
+            }
+
+            const base = obtenerEstructuraBase();
+            dbMemoria = {
+                admin: base.admin,
+                config: configRescatada || base.config,
+                categorias: categoriasRescatadas || base.categorias,
+                jornadas: noticiasRescatadas
+            };
+
+            // Guardar de inmediato en el documento definitivo v5 para asegurar persistencia
+            docRef.set(dbMemoria).then(() => {
+                leerRutaHash();
+                renderizarTodoPortal();
             });
         }
 
         async function recuperarNoticiasAnteriores() {
-            if (!confirm("¿Deseas buscar y rescatar las noticias de tu versión anterior en Firebase?")) return;
-            try {
-                const docViejo = await dbFirestore.collection("portal").doc("datos_anh_config_v2").get();
-                if (!docViejo.exists) {
-                    alert("No se encontró el documento de respaldo anterior (v2).");
-                    return;
-                }
-                const datosViejos = docViejo.data();
-                const noticiasViejas = datosViejos.jornadas || [];
-                
-                if (noticiasViejas.length === 0) {
-                    alert("El respaldo anterior no contiene noticias.");
-                    return;
-                }
-
-                const dbActual = obtenerDB();
-                const idsActuales = new Set(dbActual.jornadas.map(j => j.id));
-                let recuperadas = 0;
-
-                noticiasViejas.forEach(noticia => {
-                    if (!idsActuales.has(noticia.id)) {
-                        if (noticia.imagen && noticia.imagen.length > 200000) {
-                            noticia.imagen = "";
-                        }
-                        dbActual.jornadas.push(noticia);
-                        recuperadas++;
-                    }
-                });
-
-                if (recuperadas > 0) {
-                    guardarDB(dbActual);
-                    alert(`¡Se recuperaron ${recuperadas} noticias con éxito!`);
-                } else {
-                    alert("Todas las noticias del respaldo ya se encuentran en la base de datos.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Ocurrió un error al intentar recuperar las noticias.");
-            }
+            await autoRescatarNoticiasOcultas();
+            alert("¡Proceso de rescate completado con éxito!");
         }
 
         window.addEventListener("hashchange", () => { leerRutaHash(); });
@@ -611,7 +618,6 @@
             if (valorActual) select.value = valorActual;
         }
 
-        // Renderizado de la lista de categorías en administración con botones de Orden, Edición y Eliminación
         function renderizarEtiquetasAdmin(categorias) {
             const contenedor = document.getElementById("listaEtiquetasAdmin");
             contenedor.innerHTML = "";
@@ -624,18 +630,10 @@
                         <span class="font-medium text-slate-800">${cat}</span>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button type="button" onclick="moverEtiqueta(${index}, -1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded" title="Subir orden" ${index === 0 ? 'disabled opacity-40' : ''}>
-                            <i class="fa-solid fa-arrow-up"></i>
-                        </button>
-                        <button type="button" onclick="moverEtiqueta(${index}, 1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded" title="Bajar orden" ${index === categorias.length - 1 ? 'disabled opacity-40' : ''}>
-                            <i class="fa-solid fa-arrow-down"></i>
-                        </button>
-                        <button type="button" onclick="editarEtiqueta(${index})" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#0B4F8A] rounded font-medium ml-2">
-                            <i class="fa-solid fa-pen mr-1"></i> Editar
-                        </button>
-                        <button type="button" onclick="eliminarEtiqueta('${cat}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded font-medium">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <button type="button" onclick="moverEtiqueta(${index}, -1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded" title="Subir" ${index === 0 ? 'disabled opacity-40' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+                        <button type="button" onclick="moverEtiqueta(${index}, 1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded" title="Bajar" ${index === categorias.length - 1 ? 'disabled opacity-40' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+                        <button type="button" onclick="editarEtiqueta(${index})" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#0B4F8A] rounded font-medium ml-2"><i class="fa-solid fa-pen mr-1"></i> Editar</button>
+                        <button type="button" onclick="eliminarEtiqueta('${cat}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded font-medium"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 `;
                 contenedor.appendChild(row);
@@ -670,26 +668,16 @@
             const nuevoNombre = prompt("Modifica el nombre de la categoría:", actual);
             if (!nuevoNombre || !nuevoNombre.trim()) return;
             const nombreLimpio = nuevoNombre.trim();
-            if (db.categorias.includes(nombreLimpio)) {
-                alert("Ya existe otra categoría con ese nombre.");
-                return;
-            }
+            if (db.categorias.includes(nombreLimpio)) { alert("Ya existe otra categoría con ese nombre."); return; }
             
             db.categorias[index] = nombreLimpio;
-
-            // Actualizar también los artículos que tenían la categoría anterior
-            db.jornadas.forEach(j => {
-                if (j.lugar === actual) {
-                    j.lugar = nombreLimpio;
-                }
-            });
-
+            db.jornadas.forEach(j => { if (j.lugar === actual) j.lugar = nombreLimpio; });
             guardarDB(db);
-            alert("¡Categoría editada y actualizada en los artículos con éxito!");
+            alert("¡Categoría editada con éxito!");
         }
 
         function eliminarEtiqueta(cat) {
-            if (confirm(`¿Estás seguro de eliminar la categoría "${cat}"?`)) {
+            if (confirm(`¿Eliminar la categoría "${cat}"?`)) {
                 const db = obtenerDB();
                 db.categorias = db.categorias.filter(c => c !== cat);
                 guardarDB(db);
@@ -761,7 +749,7 @@
 
             listaContainer.innerHTML = "";
             if (paginadas.length === 0) {
-                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No hay publicaciones registradas todavía en esta sección.</div>`;
+                listaContainer.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">No hay publicaciones registradas todavía en esta sección. Si tenías noticias anteriores, haz clic en "Forzar Rescate Total" en la Mesa de Redacción.</div>`;
                 pagContenedor.innerHTML = "";
                 return;
             }
